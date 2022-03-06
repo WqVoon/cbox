@@ -82,19 +82,7 @@ func getImageIdx(rootDir *string) ImageIdx {
 	var ret ImageIdx
 
 	idxFilePath := path.Join(*rootDir, "images", "images.json")
-	if _, err := os.Stat(idxFilePath); os.IsNotExist(err) {
-		ioutil.WriteFile(idxFilePath, []byte("{}"), 0644)
-		return ret
-	}
-
-	data, err := ioutil.ReadFile(idxFilePath)
-	if err != nil {
-		log.Fatalln("can not read idx file, err:", err)
-	}
-
-	if err := json.Unmarshal(data, &ret); err != nil {
-		log.Fatalln("can not unmarshal idx file, err:", err)
-	}
+	getObjFromJsonFile(idxFilePath, &ret)
 
 	return ret
 }
@@ -113,19 +101,22 @@ func getManifest(rootDir *string, idx ImageIdx, name string, version string) Man
 	}
 
 	manifestFilePath := path.Join(*rootDir, "images", hash, "manifest.json")
-
-	if _, err := os.Stat(manifestFilePath); err != nil {
-		log.Fatalf("faild to get manifest of image %s:%s, err: %v\n", name, version, err)
-	}
-
-	data, err := ioutil.ReadFile(manifestFilePath)
-	if err != nil {
-		log.Fatalln("can not read idx file, err:", err)
-	}
-
-	if err := json.Unmarshal(data, &ret); err != nil {
-		log.Fatalln("can not unmarshal idx file, err:", err)
-	}
+	getObjFromJsonFile(manifestFilePath, &ret)
 
 	return ret
+}
+
+func getObjFromJsonFile(filePath string, obj interface{}) {
+	if _, err := os.Stat(filePath); err != nil {
+		log.Fatalln("faild to stat json file, err:", err)
+	}
+
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		log.Fatalln("can not read json file, err:", err)
+	}
+
+	if err := json.Unmarshal(data, obj); err != nil {
+		log.Fatalln("can not unmarshal json file, err:", err)
+	}
 }
