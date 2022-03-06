@@ -13,11 +13,16 @@ var (
 	rootDir = flag.String("root_dir", "", "cbox root directory (default $HOME/cbox-dir)")
 )
 
-type ImageIdx map[ImageName]ImageEntity
-type ImageEntity map[ImageVersion]ImageHash
-type ImageName string
-type ImageVersion string
-type ImageHash string
+type ImageIdx map[string]ImageEntity
+
+// image name -> image hash
+type ImageEntity map[string]string
+
+type Manifest []struct {
+	Config   string
+	RepoTags []string
+	Layers   []string
+}
 
 func main() {
 	log.SetFlags(0)
@@ -36,6 +41,16 @@ func main() {
 		for version, hash := range entity {
 			log.Println(" -", version, ":", hash)
 		}
+	}
+
+	manifest := getManifest(rootDir, idx, "hello-world", "latest")
+	log.Println("get manifest:")
+	for idx, oneManifest := range manifest {
+		log.Println("- manifest", idx)
+
+		log.Println(" - config:", oneManifest.Config)
+		log.Println(" - layers:", oneManifest.Layers)
+		log.Println(" - repoTags:", oneManifest.RepoTags)
 	}
 }
 
@@ -73,6 +88,37 @@ func getImageIdx(rootDir *string) ImageIdx {
 	}
 
 	data, err := ioutil.ReadFile(idxFilePath)
+	if err != nil {
+		log.Fatalln("can not read idx file, err:", err)
+	}
+
+	if err := json.Unmarshal(data, &ret); err != nil {
+		log.Fatalln("can not unmarshal idx file, err:", err)
+	}
+
+	return ret
+}
+
+func getManifest(rootDir *string, idx ImageIdx, name string, version string) Manifest {
+	var ret Manifest
+
+	entity, isIn := idx[name]
+	if !isIn {
+		log.Fatalf("no such image in imageIdx: %s:%s\n", name, version)
+	}
+
+	hash, isIn := entity[version]
+	if !isIn {
+		log.Fatalf("no such image in imageIdx: %s:%s\n", name, version)
+	}
+
+	manifestFilePath := path.Join(*rootDir, "images", hash, "manifest.json")
+
+	if _, err := os.Stat(manifestFilePath); err != nil {
+		log.Fatalf("faild to get manifest of image %s:%s, err: %v\n", name, version, err)
+	}
+
+	data, err := ioutil.ReadFile(manifestFilePath)
 	if err != nil {
 		log.Fatalln("can not read idx file, err:", err)
 	}
