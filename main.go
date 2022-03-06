@@ -20,6 +20,7 @@ type ImageVersion string
 type ImageHash string
 
 func main() {
+	log.SetFlags(0)
 	flag.Parse()
 
 	log.Println("Hello cbox!")
