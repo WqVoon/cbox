@@ -6,6 +6,7 @@ import (
 	"github.com/wqvoon/cbox/pkg/flags"
 	"github.com/wqvoon/cbox/pkg/image"
 	"github.com/wqvoon/cbox/pkg/rootdir"
+	"github.com/wqvoon/cbox/pkg/utils"
 )
 
 func main() {
@@ -27,7 +28,7 @@ func main() {
 		}
 	}
 
-	manifest := idx.GetManifest("hello-world:latest")
+	manifest := idx.GetManifest(utils.GetNameTag("hello-world"))
 	log.Println("get manifest:")
 	for idx, oneManifest := range manifest {
 		log.Println("- manifest", idx)

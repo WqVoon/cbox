@@ -3,7 +3,6 @@ package image
 import (
 	"log"
 	"path"
-	"strings"
 
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/utils"
@@ -28,23 +27,17 @@ func GetIdx() ImageIdx {
 	return ret
 }
 
-func (idx ImageIdx) GetManifest(nameTag string) Manifest {
+func (idx ImageIdx) GetManifest(nameTag *utils.NameTag) Manifest {
 	var ret Manifest
 
-	splitedParam := strings.Split(nameTag, ":")
-	if len(splitedParam) != 2 {
-		log.Fatalln("error format of nameTag, should be `name:tag`")
-	}
-	name, tag := splitedParam[0], splitedParam[1]
-
-	entity, isIn := idx[name]
+	entity, isIn := idx[nameTag.Name]
 	if !isIn {
-		log.Fatalf("no such image in imageIdx: %s:%s\n", name, tag)
+		log.Fatalln("no such image in imageIdx:", nameTag)
 	}
 
-	hash, isIn := entity[tag]
+	hash, isIn := entity[nameTag.Tag]
 	if !isIn {
-		log.Fatalf("no such image in imageIdx: %s:%s\n", name, tag)
+		log.Fatalln("no such image in imageIdx:", nameTag)
 	}
 
 	manifestFilePath := path.Join(rootdir.GetPath(), "images", hash, "manifest.json")
