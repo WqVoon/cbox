@@ -12,10 +12,19 @@ import (
 type ImageEntity map[string]string
 type ImageIdx map[string]ImageEntity
 
-type Manifest []struct {
-	Config   string
-	RepoTags []string
-	Layers   []string
+type Manifest []*struct {
+	ConfigPath string `json:"config"`
+	RepoTags   []string
+	Layers     []string
+	Config     *ImageConfig `json:"-"`
+}
+
+type ImageConfigDetail struct {
+	Env []string `json:"Env"`
+	Cmd []string `json:"Cmd"`
+}
+type ImageConfig struct {
+	Config ImageConfigDetail `json:"config"`
 }
 
 func GetIdx() ImageIdx {
@@ -42,6 +51,13 @@ func (idx ImageIdx) GetManifest(nameTag *utils.NameTag) Manifest {
 
 	manifestFilePath := path.Join(rootdir.GetPath(), "images", hash, "manifest.json")
 	utils.GetObjFromJsonFile(manifestFilePath, &ret)
+
+	for _, oneManifest := range ret {
+		absImageConfigPath := path.Join(rootdir.GetPath(), "images", hash, oneManifest.ConfigPath)
+
+		oneManifest.Config = &ImageConfig{}
+		utils.GetObjFromJsonFile(absImageConfigPath, oneManifest.Config)
+	}
 
 	return ret
 }
