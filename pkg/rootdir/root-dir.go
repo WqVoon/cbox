@@ -23,4 +23,18 @@ func Init() {
 	}
 }
 
-var GetPath = flags.GetRootDirPath
+var GetRootPath = flags.GetRootDirPath
+
+func GetContainerPath() string { return path.Join(GetRootPath(), "containers") }
+
+func GetImagePath() string { return path.Join(GetRootPath(), "images") }
+
+func GetImageIdxPath() string { return path.Join(GetImagePath(), "images.json") }
+
+func GetManifestPath(imageHash string) string {
+	return path.Join(GetImagePath(), imageHash, "manifest.json")
+}
+
+func GetImageConfigPath(imageHash, configFileName string) string {
+	return path.Join(GetImagePath(), imageHash, configFileName)
+}

@@ -16,7 +16,7 @@ func main() {
 	log.Println("Hello cbox!")
 
 	rootdir.Init()
-	log.Println("successfully create root dir:", rootdir.GetPath())
+	log.Println("successfully create root dir:", rootdir.GetRootPath())
 
 	idx := image.GetIdx()
 	log.Println("get idx:")

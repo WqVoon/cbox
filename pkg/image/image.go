@@ -2,7 +2,6 @@ package image
 
 import (
 	"log"
-	"path"
 
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/utils"
@@ -30,7 +29,7 @@ type ImageConfig struct {
 func GetIdx() ImageIdx {
 	var ret ImageIdx
 
-	idxFilePath := path.Join(rootdir.GetPath(), "images", "images.json")
+	idxFilePath := rootdir.GetImageIdxPath()
 	utils.GetObjFromJsonFile(idxFilePath, &ret)
 
 	return ret
@@ -49,11 +48,11 @@ func (idx ImageIdx) GetManifest(nameTag *utils.NameTag) Manifest {
 		log.Fatalln("no such image in imageIdx:", nameTag)
 	}
 
-	manifestFilePath := path.Join(rootdir.GetPath(), "images", hash, "manifest.json")
+	manifestFilePath := rootdir.GetManifestPath(hash)
 	utils.GetObjFromJsonFile(manifestFilePath, &ret)
 
 	for _, oneManifest := range ret {
-		absImageConfigPath := path.Join(rootdir.GetPath(), "images", hash, oneManifest.ConfigPath)
+		absImageConfigPath := rootdir.GetImageConfigPath(hash, oneManifest.ConfigPath)
 
 		oneManifest.Config = &ImageConfig{}
 		utils.GetObjFromJsonFile(absImageConfigPath, oneManifest.Config)
