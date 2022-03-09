@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/wqvoon/cbox/pkg/container"
 	"github.com/wqvoon/cbox/pkg/flags"
 	"github.com/wqvoon/cbox/pkg/image"
 	"github.com/wqvoon/cbox/pkg/rootdir"
@@ -37,4 +38,12 @@ func main() {
 		log.Println(" - layers:", oneManifest.Layers)
 		log.Println(" - repoTags:", oneManifest.RepoTags)
 	}
+
+	containerID := container.NewContainerID()
+	log.Println("get containerID:", containerID)
+	container.CreateContainerRootDir(containerID)
+	log.Println("create container root dir done")
+
+	container.MountFSByRawCopy(manifest, containerID)
+	log.Println("mount done")
 }

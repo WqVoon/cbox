@@ -1,11 +1,10 @@
 package rootdir
 
 import (
-	"log"
-	"os"
 	"path"
 
 	"github.com/wqvoon/cbox/pkg/flags"
+	"github.com/wqvoon/cbox/pkg/utils"
 )
 
 func Init() {
@@ -14,27 +13,36 @@ func Init() {
 
 	for _, subPath := range subPaths {
 		path := path.Join(rootPath, subPath)
-
-		if _, err := os.Stat(path); os.IsNotExist(err) {
-			if err = os.MkdirAll(path, 0755); err != nil {
-				log.Fatalln("faild to create directory, err:", err)
-			}
-		}
+		utils.CreateDirIfNotExist(path)
 	}
 }
 
 var GetRootPath = flags.GetRootDirPath
 
-func GetContainerPath() string { return path.Join(GetRootPath(), "containers") }
+func GetContainerRootPath() string { return path.Join(GetRootPath(), "containers") }
 
-func GetImagePath() string { return path.Join(GetRootPath(), "images") }
+func GetImageRootPath() string { return path.Join(GetRootPath(), "images") }
 
-func GetImageIdxPath() string { return path.Join(GetImagePath(), "images.json") }
+func GetImageIdxPath() string { return path.Join(GetImageRootPath(), "images.json") }
+
+func GetImagePath(imageHash string) string { return path.Join(GetImageRootPath(), imageHash) }
 
 func GetManifestPath(imageHash string) string {
-	return path.Join(GetImagePath(), imageHash, "manifest.json")
+	return path.Join(GetImagePath(imageHash), "manifest.json")
 }
 
 func GetImageConfigPath(imageHash, configFileName string) string {
-	return path.Join(GetImagePath(), imageHash, configFileName)
+	return path.Join(GetImagePath(imageHash), configFileName)
+}
+
+func GetContainerPath(containerID string) string {
+	return path.Join(GetContainerRootPath(), containerID)
+}
+
+func GetContainerFSPath(containerID string) string {
+	return path.Join(GetContainerRootPath(), containerID, "fs")
+}
+
+func GetContainerMountPath(containerID string) string {
+	return path.Join(GetContainerFSPath(containerID), "mnt")
 }
