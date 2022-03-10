@@ -2,6 +2,7 @@ package container
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/wqvoon/cbox/pkg/image"
 	"github.com/wqvoon/cbox/pkg/rootdir"
@@ -24,22 +25,24 @@ type Container struct {
 	Env        []string
 	Entrypoint []string
 	Image      *image.Image
+	// TODO: 可能需要补充 namespace、pid 等运行时内容
 }
 
 func CreateContainer(img *image.Image, name string) *Container {
 	containerID := newContainerID()
 
 	createContainerLayout(containerID)
-	/*
-		TODO: 写入一个 json 文件用于记录
-		格式形如: {
-			<containerName>: {
-				"container_id": <id>,
-				"image_id": <id>
-			}
-		}
-		可以根据容器名找到容器和其镜像
-	*/
+
+	idx := GetContainerIdx()
+	if idx.Has(name) {
+		log.Fatalln("container name has exists, try another plz")
+	}
+
+	idx[name] = &ContainerEntity{
+		ContainerID: containerID,
+		ImageHash:   img.Hash,
+	}
+	idx.Save()
 
 	return &Container{
 		rootPath: rootdir.GetContainerLayoutPath(containerID),

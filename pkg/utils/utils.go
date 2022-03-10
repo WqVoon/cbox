@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 )
 
 func GetObjFromJsonFile(filePath string, obj interface{}) {
@@ -15,11 +16,22 @@ func GetObjFromJsonFile(filePath string, obj interface{}) {
 
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		log.Fatalln("can not read json file, err:", err)
+		log.Fatalln("faild to read json file, err:", err)
 	}
 
 	if err := json.Unmarshal(data, obj); err != nil {
-		log.Fatalln("can not unmarshal json file, err:", err)
+		log.Fatalln("faild to unmarshal json file, err:", err)
+	}
+}
+
+func SaveObjToJsonFile(filePath string, obj interface{}) {
+	data, err := json.Marshal(obj)
+	if err != nil {
+		log.Fatalln("faild to marshal obj to json, err:", err)
+	}
+
+	if err := ioutil.WriteFile(filePath, data, 0644); err != nil {
+		log.Fatalln("faild to write json obj to file, err:", err)
 	}
 }
 
@@ -27,6 +39,24 @@ func CreateDirIfNotExist(path string) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		if err = os.MkdirAll(path, 0755); err != nil {
 			log.Fatalln("faild to create directory, err:", err)
+		}
+	}
+}
+
+func WriteFileIfNotExist(filePath string, content []byte) {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		dirPath := path.Dir(filePath)
+		if dirPath != "." {
+			CreateDirIfNotExist(dirPath)
+		}
+
+		file, err := os.Create(filePath)
+		if err != nil {
+			log.Fatalln("faild to create file, err:", err)
+		}
+
+		if _, err = file.Write(content); err != nil {
+			log.Fatalln("faild to write file, err:", err)
 		}
 	}
 }

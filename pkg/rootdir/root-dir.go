@@ -9,11 +9,17 @@ import (
 
 func Init() {
 	rootPath := flags.GetRootDirPath()
-	subPaths := []string{"containers", "images"}
+	subPaths := []string{
+		path.Join("containers", "idx.json"),
+		path.Join("images", "idx.json"),
+	}
+
+	data := []byte("{}")
 
 	for _, subPath := range subPaths {
 		path := path.Join(rootPath, subPath)
-		utils.CreateDirIfNotExist(path)
+
+		utils.WriteFileIfNotExist(path, data)
 	}
 }
 
@@ -23,13 +29,15 @@ func GetContainerRootPath() string { return path.Join(GetRootPath(), "containers
 
 func GetImageRootPath() string { return path.Join(GetRootPath(), "images") }
 
-func GetImageIdxPath() string { return path.Join(GetImageRootPath(), "images.json") }
+func GetImageIdxPath() string { return path.Join(GetImageRootPath(), "idx.json") }
 
 func GetImageLayoutPath(imageHash string) string { return path.Join(GetImageRootPath(), imageHash) }
 
 func GetManifestPath(imageHash string) string {
 	return path.Join(GetImageLayoutPath(imageHash), "manifest.json")
 }
+
+func GetContainerIdxPath() string { return path.Join(GetContainerRootPath(), "idx.json") }
 
 func GetImageConfigPath(imageHash, configFileName string) string {
 	return path.Join(GetImageLayoutPath(imageHash), configFileName)
