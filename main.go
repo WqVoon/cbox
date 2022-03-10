@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 
-	"github.com/wqvoon/cbox/pkg/container"
 	"github.com/wqvoon/cbox/pkg/flags"
 	"github.com/wqvoon/cbox/pkg/image"
 	"github.com/wqvoon/cbox/pkg/rootdir"
@@ -19,31 +18,10 @@ func main() {
 	rootdir.Init()
 	log.Println("successfully create root dir:", rootdir.GetRootPath())
 
-	idx := image.GetIdx()
-	log.Println("get idx:")
-	for name, entity := range idx {
-		log.Println("-", name)
+	img := image.GetImageFromLocal(utils.GetNameTag("hello-world"))
+	log.Println(img)
 
-		for version, hash := range entity {
-			log.Println(" -", version, ":", hash)
-		}
-	}
+	log.Printf("Manifest: %+v\n\n", img.Manifest)
 
-	manifest := idx.GetManifest(utils.GetNameTag("hello-world"))
-	log.Println("get manifest:")
-	for idx, oneManifest := range manifest {
-		log.Println("- manifest", idx)
-
-		log.Println(" - config:", oneManifest.Config)
-		log.Println(" - layers:", oneManifest.Layers)
-		log.Println(" - repoTags:", oneManifest.RepoTags)
-	}
-
-	containerID := container.NewContainerID()
-	log.Println("get containerID:", containerID)
-	container.CreateContainerRootDir(containerID)
-	log.Println("create container root dir done")
-
-	container.MountFSByRawCopy(manifest, containerID)
-	log.Println("mount done")
+	log.Printf("Config: %+v\n", img.Config)
 }

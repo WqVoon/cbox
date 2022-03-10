@@ -25,14 +25,14 @@ func GetImageRootPath() string { return path.Join(GetRootPath(), "images") }
 
 func GetImageIdxPath() string { return path.Join(GetImageRootPath(), "images.json") }
 
-func GetImagePath(imageHash string) string { return path.Join(GetImageRootPath(), imageHash) }
+func GetImageLayoutPath(imageHash string) string { return path.Join(GetImageRootPath(), imageHash) }
 
 func GetManifestPath(imageHash string) string {
-	return path.Join(GetImagePath(imageHash), "manifest.json")
+	return path.Join(GetImageLayoutPath(imageHash), "manifest.json")
 }
 
 func GetImageConfigPath(imageHash, configFileName string) string {
-	return path.Join(GetImagePath(imageHash), configFileName)
+	return path.Join(GetImageLayoutPath(imageHash), configFileName)
 }
 
 func GetContainerPath(containerID string) string {

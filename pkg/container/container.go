@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"fmt"
 
-	"github.com/wqvoon/cbox/pkg/image"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/utils"
 )
@@ -23,10 +22,10 @@ func CreateContainerRootDir(containerID string) {
 	utils.CreateDirWithExclusive(containerMntPath)
 }
 
-func MountFSByRawCopy(manifest image.Manifest, containerID string) {
-	containerMntPath := rootdir.GetContainerMountPath(containerID)
+// func MountFSByRawCopy(manifest image.Manifest, containerID string) {
+// 	containerMntPath := rootdir.GetContainerMountPath(containerID)
 
-	for _, layerPath := range manifest.GetLayerPaths() {
-		utils.CopyDir(layerPath, containerMntPath)
-	}
-}
+// 	for _, layerPath := range manifest.GetLayerPaths() {
+// 		utils.CopyDir(layerPath, containerMntPath)
+// 	}
+// }
