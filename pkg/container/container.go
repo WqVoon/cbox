@@ -1,26 +1,12 @@
 package container
 
 import (
-	"crypto/rand"
 	"fmt"
 
+	"github.com/wqvoon/cbox/pkg/image"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/utils"
 )
-
-func NewContainerID() string {
-	randBytes := make([]byte, 6)
-	rand.Read(randBytes)
-	return fmt.Sprintf("%02x%02x%02x%02x%02x%02x",
-		randBytes[0], randBytes[1], randBytes[2],
-		randBytes[3], randBytes[4], randBytes[5])
-}
-
-func CreateContainerRootDir(containerID string) {
-	containerMntPath := rootdir.GetContainerMountPath(containerID)
-
-	utils.CreateDirWithExclusive(containerMntPath)
-}
 
 // func MountFSByRawCopy(manifest image.Manifest, containerID string) {
 // 	containerMntPath := rootdir.GetContainerMountPath(containerID)
@@ -29,3 +15,54 @@ func CreateContainerRootDir(containerID string) {
 // 		utils.CopyDir(layerPath, containerMntPath)
 // 	}
 // }
+
+type Container struct {
+	rootPath string
+
+	ID         string
+	Name       string
+	Env        []string
+	Entrypoint []string
+	Image      *image.Image
+}
+
+func CreateContainer(img *image.Image, name string) *Container {
+	containerID := newContainerID()
+
+	createContainerLayout(containerID)
+	/*
+		TODO: 写入一个 json 文件用于记录
+		格式形如: {
+			<containerName>: {
+				"container_id": <id>,
+				"image_id": <id>
+			}
+		}
+		可以根据容器名找到容器和其镜像
+	*/
+
+	return &Container{
+		rootPath: rootdir.GetContainerLayoutPath(containerID),
+
+		ID:         containerID,
+		Name:       name,
+		Env:        img.Config.Config.Env,
+		Entrypoint: img.Config.Config.Cmd,
+		Image:      img,
+	}
+}
+
+func (c *Container) Start() {
+	utils.TODO()
+}
+
+func (c *Container) String() string {
+	return fmt.Sprintf(`
+Container(%s):
+	ID: %s
+	Env: %v
+	Entrypoint: %v
+`,
+		c.Name, c.ID, c.Env, c.Entrypoint,
+	)
+}

@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/wqvoon/cbox/pkg/container"
 	"github.com/wqvoon/cbox/pkg/flags"
 	"github.com/wqvoon/cbox/pkg/image"
 	"github.com/wqvoon/cbox/pkg/rootdir"
@@ -21,7 +22,8 @@ func main() {
 	img := image.GetImageFromLocal(utils.GetNameTag("hello-world"))
 	log.Println(img)
 
-	log.Printf("Manifest: %+v\n\n", img.Manifest)
+	ctr := container.CreateContainer(img, "test")
+	log.Println(ctr)
 
-	log.Printf("Config: %+v\n", img.Config)
+	ctr.Start()
 }

@@ -35,7 +35,7 @@ func GetImageConfigPath(imageHash, configFileName string) string {
 	return path.Join(GetImageLayoutPath(imageHash), configFileName)
 }
 
-func GetContainerPath(containerID string) string {
+func GetContainerLayoutPath(containerID string) string {
 	return path.Join(GetContainerRootPath(), containerID)
 }
 
