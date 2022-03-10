@@ -3,6 +3,7 @@ package image
 import (
 	"fmt"
 
+	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/utils"
 )
@@ -23,7 +24,7 @@ type Image struct {
 }
 
 func GetImage(nameTag *utils.NameTag) *Image {
-	utils.TODO()
+	log.TODO()
 	return nil
 }
 

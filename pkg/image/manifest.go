@@ -1,8 +1,7 @@
 package image
 
 import (
-	"log"
-
+	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/utils"
 )
@@ -30,7 +29,7 @@ func GetManifestByHash(hash string) *ManifestType {
 	utils.GetObjFromJsonFile(manifestFilePath, &lst)
 
 	if len(lst) != 1 {
-		log.Fatalln("unsupported length of manifest")
+		log.Errorln("unsupported length of manifest")
 	}
 
 	manifest := lst[0]

@@ -2,11 +2,10 @@ package container
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/wqvoon/cbox/pkg/image"
+	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
-	"github.com/wqvoon/cbox/pkg/utils"
 )
 
 // func MountFSByRawCopy(manifest image.Manifest, containerID string) {
@@ -35,7 +34,7 @@ func CreateContainer(img *image.Image, name string) *Container {
 
 	idx := GetContainerIdx()
 	if idx.Has(name) {
-		log.Fatalln("container name has exists, try another plz")
+		log.Errorln("container name has exists, try another plz")
 	}
 
 	idx[name] = &ContainerEntity{
@@ -56,7 +55,7 @@ func CreateContainer(img *image.Image, name string) *Container {
 }
 
 func (c *Container) Start() {
-	utils.TODO()
+	log.TODO()
 }
 
 func (c *Container) String() string {

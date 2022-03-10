@@ -7,13 +7,23 @@ import (
 	"path"
 )
 
+/*
+	!!! 这个文件不可以引入任何 cbox 内部的包，因为它可能被任何内部的包使用 !!!
+*/
+
 var (
+	parsed      = false
 	rootDirPath = flag.String("root_dir", "", "cbox root directory path (default $HOME/cbox-dir)")
+	debug       = flag.Bool("debug", false, "show call stack when run failed")
 )
 
 func ParseAll() {
-	flag.Parse()
-	prepareRootDirPath()
+	if !parsed {
+		flag.Parse()
+		prepareRootDirPath()
+
+		parsed = true
+	}
 }
 
 func GetRootDirPath() string {
@@ -21,6 +31,10 @@ func GetRootDirPath() string {
 		prepareRootDirPath()
 	}
 	return *rootDirPath
+}
+
+func IsDebugMode() bool {
+	return *debug
 }
 
 func prepareRootDirPath() {

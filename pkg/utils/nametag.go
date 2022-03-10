@@ -2,8 +2,9 @@ package utils
 
 import (
 	"fmt"
-	"log"
 	"strings"
+
+	"github.com/wqvoon/cbox/pkg/log"
 )
 
 type NameTag struct {
@@ -13,7 +14,7 @@ type NameTag struct {
 func GetNameTag(nt string) *NameTag {
 	splitedNt := strings.Split(nt, ":")
 	if len(splitedNt) > 2 {
-		log.Fatalln("error format of name tag, should be `name:tag`")
+		log.Errorln("error format of name tag, should be `name:tag`")
 	}
 
 	name := splitedNt[0]
