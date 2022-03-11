@@ -73,16 +73,17 @@ func CreateDirWithExclusive(path string) {
 	}
 }
 
-func CopyDir(from, to string) {
+func CopyDirContent(from, to string) {
 	if _, err := os.Stat(from); err != nil {
 		log.Errorln("faild to stat", from, "err:", err)
 	}
 
 	CreateDirIfNotExist(to)
 
-	cmd := exec.Command("cp", "-R", from, to)
+	cmd := exec.Command("cp", "-r", from, to)
 
-	if err := cmd.Run(); err != nil {
+	if output, err := cmd.CombinedOutput(); err != nil {
+		log.Println(string(output))
 		log.Errorf("faild to copy %s -> %s, err: %v\n", from, to, err)
 	}
 }

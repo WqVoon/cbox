@@ -14,6 +14,7 @@ import (
 var (
 	parsed      = false
 	rootDirPath = flag.String("root_dir", "", "cbox root directory path (default $HOME/cbox-dir)")
+	driverName  = flag.String("storage_driver", "raw_copy", "use which storage driver")
 	debug       = flag.Bool("debug", false, "show call stack when run failed")
 )
 
@@ -35,6 +36,10 @@ func GetRootDirPath() string {
 
 func IsDebugMode() bool {
 	return *debug
+}
+
+func GetStorageDriver() string {
+	return *driverName
 }
 
 func prepareRootDirPath() {

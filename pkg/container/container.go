@@ -64,18 +64,6 @@ func GetContainerByID(id string) *Container {
 	return getContainerHelper(img, id, name)
 }
 
-func (c *Container) Start() {
-	log.TODO()
-}
-
-func (c *Container) Stop() {
-	log.TODO()
-}
-
-func (c *Container) Delete() {
-	log.TODO()
-}
-
 func (c *Container) String() string {
 	return fmt.Sprintf(`
 Container(%s):
