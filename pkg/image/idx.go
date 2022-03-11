@@ -6,8 +6,10 @@ import (
 	"github.com/wqvoon/cbox/pkg/utils"
 )
 
-// image name -> image hash
+// image tag -> image hash
 type ImageEntity map[string]string
+
+// image name -> ImageEntity
 type ImageIdx map[string]ImageEntity
 
 func GetImageIdx() ImageIdx {
@@ -31,4 +33,23 @@ func (idx ImageIdx) GetImageHash(nameTag *utils.NameTag) string {
 	}
 
 	return hash
+}
+
+func (idx ImageIdx) GetImageNameTag(wantHash string) *utils.NameTag {
+	// TODO: 当前的实现很低效
+	for name, entity := range idx {
+		for tag, hash := range entity {
+			if hash != wantHash {
+				continue
+			}
+
+			return &utils.NameTag{
+				Name: name,
+				Tag:  tag,
+			}
+		}
+	}
+
+	log.Errorln("no such image in imageIdx:", wantHash)
+	return nil
 }

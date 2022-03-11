@@ -17,7 +17,7 @@ func main() {
 	rootdir.Init()
 	log.Println("successfully create root dir:", rootdir.GetRootPath())
 
-	img := image.GetImageFromLocal(utils.GetNameTag("hello-world"))
+	img := image.GetImage(utils.GetNameTag("hello-world"))
 	log.Println(img)
 
 	ctr := container.CreateContainer(img, "test")

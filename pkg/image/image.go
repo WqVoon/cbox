@@ -3,7 +3,6 @@ package image
 import (
 	"fmt"
 
-	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/utils"
 )
@@ -23,25 +22,19 @@ type Image struct {
 	Layers []string
 }
 
-func GetImage(nameTag *utils.NameTag) *Image {
-	log.TODO()
-	return nil
-}
+// TODO: 后面可以做成优先搜索 nameTag，找不到再搜 hash，再找不到后退出
+var GetImage = GetImageFromLocalByNameTag
 
-func GetImageFromLocal(nameTag *utils.NameTag) *Image {
+func GetImageFromLocalByNameTag(nameTag *utils.NameTag) *Image {
 	hash := GetImageIdx().GetImageHash(nameTag)
 
-	manifest := GetManifestByHash(hash)
+	return getImageHelper(nameTag, hash)
+}
 
-	return &Image{
-		rootPath: rootdir.GetImageLayoutPath(hash),
+func GetImageFromLocalByHash(hash string) *Image {
+	nameTag := GetImageIdx().GetImageNameTag(hash)
 
-		Hash:     hash,
-		NameTag:  nameTag,
-		Manifest: manifest,
-		Config:   manifest.GetConfigByHash(hash),
-		Layers:   manifest.GetLayerFSPaths(),
-	}
+	return getImageHelper(nameTag, hash)
 }
 
 func (img *Image) String() string {
@@ -54,4 +47,20 @@ Image(%s):
 `,
 		img.NameTag, img.Hash, img.Config.rootPath, img.Manifest.rootPath, img.Layers,
 	)
+}
+
+// 仅 image 内部使用，根据已知信息帮助创建 Image 对象
+// 之所以抽离出这个方法，是因为后面可能会以 functional options 模式传参
+func getImageHelper(nameTag *utils.NameTag, hash string) *Image {
+	manifest := GetManifestByHash(hash)
+
+	return &Image{
+		rootPath: rootdir.GetImageLayoutPath(hash),
+
+		Hash:     hash,
+		NameTag:  nameTag,
+		Manifest: manifest,
+		Config:   manifest.GetConfigByHash(hash),
+		Layers:   manifest.GetLayerFSPaths(),
+	}
 }
