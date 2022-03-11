@@ -1,6 +1,7 @@
 package container
 
 import (
+	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/utils"
 )
@@ -30,4 +31,25 @@ func (c ContainerIdx) Has(containerName string) bool {
 	_, has := c[containerName]
 
 	return has
+}
+
+func (c ContainerIdx) GetAllByName(name string) (string, *ContainerEntity) {
+	if entity, isIn := c[name]; isIn {
+		return name, entity
+	}
+
+	log.Errorln("no such container in containerIdx:", name)
+	return "", nil
+}
+
+// TODO：可以像 Docker 一样做前缀匹配
+func (c ContainerIdx) GetAllByID(id string) (string, *ContainerEntity) {
+	for name, entity := range c {
+		if entity.ContainerID == id {
+			return name, entity
+		}
+	}
+
+	log.Errorln("no such container in containerIdx:", id)
+	return "", nil
 }

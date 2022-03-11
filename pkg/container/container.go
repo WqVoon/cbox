@@ -28,6 +28,9 @@ type Container struct {
 }
 
 func CreateContainer(img *image.Image, name string) *Container {
+	// TODO：
+	//  后面可以试着抽象出接口，然后把这个 CreateContainer 方法直接给 Image 对象
+	//  当前会有 image 和 container 循环引用的问题
 	containerID := newContainerID()
 
 	createContainerLayout(containerID)
@@ -43,18 +46,33 @@ func CreateContainer(img *image.Image, name string) *Container {
 	}
 	idx.Save()
 
-	return &Container{
-		rootPath: rootdir.GetContainerLayoutPath(containerID),
+	return getContainerHelper(img, containerID, name)
+}
 
-		ID:         containerID,
-		Name:       name,
-		Env:        img.Config.Config.Env,
-		Entrypoint: img.Config.Config.Cmd,
-		Image:      img,
-	}
+// TODO: 新增一个 GetContainer 方法，依次按 name、id 搜索
+func GetContainerByName(name string) *Container {
+	name, entity := GetContainerIdx().GetAllByName(name)
+	img := image.GetImageFromLocalByHash(entity.ImageHash)
+
+	return getContainerHelper(img, entity.ContainerID, name)
+}
+
+func GetContainerByID(id string) *Container {
+	name, entity := GetContainerIdx().GetAllByID(id)
+	img := image.GetImageFromLocalByHash(entity.ImageHash)
+
+	return getContainerHelper(img, id, name)
 }
 
 func (c *Container) Start() {
+	log.TODO()
+}
+
+func (c *Container) Stop() {
+	log.TODO()
+}
+
+func (c *Container) Delete() {
 	log.TODO()
 }
 
@@ -67,4 +85,18 @@ Container(%s):
 `,
 		c.Name, c.ID, c.Env, c.Entrypoint,
 	)
+}
+
+// 仅 container 内部使用，根据已知信息帮助创建 Container 对象
+// 原因同 image.getImageHelper 方法
+func getContainerHelper(img *image.Image, containerID, containerName string) *Container {
+	return &Container{
+		rootPath: rootdir.GetContainerLayoutPath(containerID),
+
+		ID:         containerID,
+		Name:       containerName,
+		Env:        img.Config.Config.Env,
+		Entrypoint: img.Config.Config.Cmd,
+		Image:      img,
+	}
 }

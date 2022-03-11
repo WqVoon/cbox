@@ -23,5 +23,11 @@ func main() {
 	ctr := container.CreateContainer(img, "test")
 	log.Println(ctr)
 
+	ctr = container.GetContainerByName(ctr.Name)
+	log.Println("ByName:", ctr)
+
+	ctr = container.GetContainerByID(ctr.ID)
+	log.Println("ByID:", ctr)
+
 	ctr.Start()
 }
