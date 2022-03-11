@@ -33,8 +33,6 @@ func CreateContainer(img *image.Image, name string) *Container {
 	//  当前会有 image 和 container 循环引用的问题
 	containerID := newContainerID()
 
-	createContainerLayout(containerID)
-
 	idx := GetContainerIdx()
 	if idx.Has(name) {
 		log.Errorln("container name has exists, try another plz")
@@ -45,6 +43,8 @@ func CreateContainer(img *image.Image, name string) *Container {
 		ImageHash:   img.Hash,
 	}
 	idx.Save()
+
+	createContainerLayout(containerID)
 
 	return getContainerHelper(img, containerID, name)
 }
