@@ -8,6 +8,7 @@ import (
 
 type ManifestType struct {
 	rootPath string
+	filePath string
 
 	Config   string
 	RepoTags []string
@@ -33,7 +34,8 @@ func GetManifestByHash(hash string) *ManifestType {
 	}
 
 	manifest := lst[0]
-	manifest.rootPath = rootdir.GetManifestPath(hash)
+	manifest.rootPath = rootdir.GetImageLayoutPath(hash)
+	manifest.filePath = rootdir.GetManifestPath(hash)
 
 	return manifest
 }

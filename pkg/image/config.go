@@ -10,7 +10,7 @@ type ImageConfigDetail struct {
 	Cmd []string `json:"Cmd"`
 }
 type ImageConfig struct {
-	rootPath string
+	filePath string
 
 	Config ImageConfigDetail `json:"config"`
 }
@@ -25,7 +25,7 @@ func (manifest *ManifestType) GetConfigByHash(hash string) *ImageConfig {
 	imageConfigPath := rootdir.GetImageConfigPath(hash, manifest.Config)
 
 	config := &ImageConfig{}
-	config.rootPath = imageConfigPath
+	config.filePath = imageConfigPath
 	utils.GetObjFromJsonFile(imageConfigPath, config)
 
 	return config

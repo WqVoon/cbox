@@ -45,7 +45,7 @@ Image(%s):
 	ManifestPath: %s
 	Layers: %v
 `,
-		img.NameTag, img.Hash, img.Config.rootPath, img.Manifest.rootPath, img.Layers,
+		img.NameTag, img.Hash, img.Config.filePath, img.Manifest.rootPath, img.Layers,
 	)
 }
 
