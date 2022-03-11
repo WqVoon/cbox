@@ -33,3 +33,22 @@ Container 对象有 Start 方法，这里执行 Mount，控制流进入 Containe
 命令行参数，用 ...string 来表示，如果不传则去运行 Entrypoint
 
 Container 对象有 Exec 方法
+
+
+## StorageDriver.Interface
+```go
+type Interface interface {
+	// dst 是 Container 的 fs 目录，Mount 方法将 layerPaths 指明的镜像层一起挂载到 dst 上
+	// TODO：layerPaths 的顺序由谁控制
+	Mount(dst string, layerPaths ...string)
+
+	// 卸载 Container 的 fs
+	UnMount(dst string)
+}
+
+```
+
+StorageDriver 用于屏蔽不同存储方案的差异，目前先不考虑 Volume 部分，Mount 应该在 Container.Start 时被调用，
+UnMount 应该在 Container.Stop 时被调用
+
+目前计划实现 rawCopy，Overlay 和 DeviceMapper
