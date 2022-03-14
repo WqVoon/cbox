@@ -1,7 +1,7 @@
 package main
 
 import (
-	"os"
+	"flag"
 
 	"github.com/wqvoon/cbox/pkg/container"
 	"github.com/wqvoon/cbox/pkg/flags"
@@ -21,16 +21,18 @@ func main() {
 	rootdir.Init()
 	log.Println("successfully create root dir:", rootdir.GetRootPath())
 
-	cmd := os.Args[1]
+	args := flag.Args()
+	cmd := args[0]
+
 	var c *container.Container
 	switch cmd {
 	case "create":
-		imageNameTag, containerName := os.Args[2], os.Args[3]
+		imageNameTag, containerName := args[1], args[2]
 		c = container.CreateContainer(image.GetImage(utils.GetNameTag(imageNameTag)), containerName)
 		c.Start()
 
 	case "get":
-		containerName := os.Args[2]
+		containerName := args[1]
 		c = container.GetContainerByName(containerName)
 		c.Start()
 	}
