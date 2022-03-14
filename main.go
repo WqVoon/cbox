@@ -30,11 +30,8 @@ func main() {
 		imageNameTag, containerName := args[1], args[2]
 		c = container.CreateContainer(image.GetImage(utils.GetNameTag(imageNameTag)), containerName)
 		c.Start()
+		c.Delete()
 
-	case "get":
-		containerName := args[1]
-		c = container.GetContainerByName(containerName)
-		c.Start()
 	}
 
 }

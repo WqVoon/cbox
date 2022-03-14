@@ -61,5 +61,11 @@ func (c *Container) Stop() {
 }
 
 func (c *Container) Delete() {
-	log.TODO()
+	// TODO: 先检测是否执行过 Stop
+
+	GetContainerIdx().DeleteByName(c.Name)
+	if err := os.RemoveAll(c.rootPath); err != nil {
+		log.Errorf("faild to remove container %q, err: %v\n", c.Name, err)
+	}
+	// TODO: 后面要处理更多的运行时副作用
 }

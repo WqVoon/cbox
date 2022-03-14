@@ -27,6 +27,15 @@ func (c ContainerIdx) Save() {
 	utils.SaveObjToJsonFile(idxFilePath, c)
 }
 
+func (c ContainerIdx) DeleteByName(name string) {
+	if !c.Has(name) {
+		log.Errorln("no such container in idx:", name)
+	}
+
+	delete(c, name)
+	c.Save()
+}
+
 func (c ContainerIdx) Has(containerName string) bool {
 	_, has := c[containerName]
 
