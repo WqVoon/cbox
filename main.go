@@ -8,11 +8,17 @@ import (
 	"github.com/wqvoon/cbox/pkg/image"
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
+	"github.com/wqvoon/cbox/pkg/runtime"
+	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
 	"github.com/wqvoon/cbox/pkg/storage/driver"
 	"github.com/wqvoon/cbox/pkg/utils"
 )
 
 func main() {
+	if runtimeUtils.IsRuntimeMode() {
+		runtime.Handle()
+	}
+
 	flags.ParseAll()
 
 	log.Println("Hello cbox!")
