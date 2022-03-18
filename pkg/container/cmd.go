@@ -38,6 +38,15 @@ func (c *Container) Stop() {
 	if err := unix.Unmount(procPath, 0); err != nil {
 		log.Errorln("faild to unmount proc, err:", err)
 	}
+
+	namespaces := []string{"/pid", "/uts", "/ipc"}
+	nsPath := rootdir.GetContainerNSPath(c.ID)
+	for _, ns := range namespaces {
+		dstPath := path.Join(nsPath, ns)
+		if err := unix.Unmount(dstPath, 0); err != nil {
+			log.Errorf("failed to unmount %q, err: %v\n", dstPath, err)
+		}
+	}
 }
 
 func (c *Container) Delete() {

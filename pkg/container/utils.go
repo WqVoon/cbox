@@ -3,6 +3,7 @@ package container
 import (
 	"crypto/rand"
 	"fmt"
+	"path"
 
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/utils"
@@ -18,6 +19,15 @@ func newContainerID() string {
 
 func createContainerLayout(containerID string) {
 	containerMntPath := rootdir.GetContainerMountPath(containerID)
-
 	utils.CreateDirWithExclusive(containerMntPath)
+
+	containerNSPath := rootdir.GetContainerNSPath(containerID)
+	utils.CreateDirWithExclusive(containerNSPath)
+
+	namespaces := []string{"ipc", "uts", "pid"}
+	pathPrefix := rootdir.GetContainerNSPath(containerID)
+	for _, ns := range namespaces {
+		fullPath := path.Join(pathPrefix, ns)
+		utils.WriteFileIfNotExist(fullPath, nil)
+	}
 }

@@ -19,6 +19,18 @@ func Handle() {
 
 	c := container.GetContainerByID(os.Args[1])
 
+	// TODO: 待补充其他的 ns
+	namespaces := []string{"/pid", "/uts", "/ipc"}
+	srcPathPrefix := "/proc/self/ns"
+	dstPathPrefix := rootdir.GetContainerNSPath(c.ID)
+	for _, ns := range namespaces {
+		src := srcPathPrefix + ns
+		dst := dstPathPrefix + ns
+		if err := unix.Mount(src, dst, "", unix.MS_BIND, ""); err != nil {
+			log.Errorf("failed to bind mount %q to %q, err: %v\n", src, dst, err)
+		}
+	}
+
 	// 需要保证在 ExtractCmdFromOSArgs 前进行 Env 的处理，这样得到的 path 才是正确的
 	os.Clearenv()
 	for _, oneEnv := range c.Env {

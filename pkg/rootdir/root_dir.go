@@ -82,6 +82,11 @@ func GetContainerLayoutPath(containerID string) string {
 
 //----- Container Layout Start -----
 
+// container 的 ns 文件夹，内部绑定挂载了容器对应的 ns
+func GetContainerNSPath(containerID string) string {
+	return path.Join(GetContainerLayoutPath(containerID), "ns")
+}
+
 // container 的 fs，内部最重要的是 mnt 文件夹，此外根据不同的 StorageDriver 可能会有其他文件夹
 func GetContainerFSPath(containerID string) string {
 	return path.Join(GetContainerLayoutPath(containerID), "fs")
