@@ -32,13 +32,26 @@ func main() {
 
 	var c *container.Container
 	switch cmd {
-	case "create":
-		imageNameTag, containerName := args[1], args[2]
-		c = container.CreateContainer(image.GetImage(utils.GetNameTag(imageNameTag)), containerName)
+	case "test": // 一条龙服务
+		c = container.CreateContainer(image.GetImage(utils.GetNameTag("alpine")), "test")
 		c.Start()
 		c.Stop()
 		c.Delete()
 
+	case "run": // create + start
+		imageNameTag, containerName := args[1], args[2]
+		c = container.CreateContainer(image.GetImage(utils.GetNameTag(imageNameTag)), containerName)
+		c.Start()
+
+	case "stop": // by name
+		name := args[1]
+		c = container.GetContainerByName(name)
+		c.Stop()
+
+	case "delete": // by name
+		name := args[1]
+		c = container.GetContainerByName(name)
+		c.Delete()
 	}
 
 }
