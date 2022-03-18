@@ -19,6 +19,11 @@ func Handle() {
 
 	c := container.GetContainerByID(os.Args[1])
 
+	// 这里就不 Error 了，仅做个提醒，也不是啥大事
+	if err := unix.Sethostname([]byte(c.ID)); err != nil {
+		log.Println("faild to set hostname, err:", err)
+	}
+
 	// TODO: 待补充其他的 ns
 	namespaces := []string{"/pid", "/uts", "/ipc"}
 	srcPathPrefix := "/proc/self/ns"
