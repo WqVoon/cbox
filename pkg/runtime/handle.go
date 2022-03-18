@@ -8,7 +8,8 @@ import (
 	"github.com/wqvoon/cbox/pkg/container"
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
-	"github.com/wqvoon/cbox/pkg/runtime/utils"
+	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
+	"github.com/wqvoon/cbox/pkg/utils"
 	"golang.org/x/sys/unix"
 )
 
@@ -29,7 +30,13 @@ func Handle() {
 	// 这里需要保证在 ExtractCmdFromOSArgs 前进行 chroot，这样得到的 path 才是正确的
 	unix.Chroot(rootdir.GetContainerMountPath(c.ID))
 
-	path, args := utils.ExtractCmdFromOSArgs()
+	// TODO: Mount 的第一个参数如果留空则宿主机上会因为解析错误而读不到这条记录，也许可以利用下
+	utils.CreateDirIfNotExist("/proc")
+	if err := unix.Mount("cbox-proc", "/proc", "proc", 0, ""); err != nil {
+		log.Errorln("faild to mount /proc, err:", err)
+	}
+
+	path, args := runtimeUtils.ExtractCmdFromOSArgs()
 	cmd := &exec.Cmd{
 		Path: path,
 		Args: args,

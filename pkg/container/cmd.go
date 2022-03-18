@@ -2,12 +2,14 @@ package container
 
 import (
 	"os"
+	"path"
 
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/runtime/cmd"
 	"github.com/wqvoon/cbox/pkg/storage/driver"
 	"github.com/wqvoon/cbox/pkg/utils"
+	"golang.org/x/sys/unix"
 )
 
 func (c *Container) Start(input ...string) {
@@ -30,7 +32,12 @@ func (c *Container) Start(input ...string) {
 }
 
 func (c *Container) Stop() {
-	log.TODO()
+	mntPath := rootdir.GetContainerMountPath(c.ID)
+
+	procPath := path.Join(mntPath, "proc")
+	if err := unix.Unmount(procPath, 0); err != nil {
+		log.Errorln("faild to unmount proc, err:", err)
+	}
 }
 
 func (c *Container) Delete() {
