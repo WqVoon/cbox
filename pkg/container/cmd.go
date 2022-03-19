@@ -2,23 +2,34 @@ package container
 
 import (
 	"os"
+	"os/exec"
 	"path"
+	"strings"
 
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
-	"github.com/wqvoon/cbox/pkg/runtime/cmd"
+	runtimeCmd "github.com/wqvoon/cbox/pkg/runtime/cmd"
+	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
 	"github.com/wqvoon/cbox/pkg/storage/driver"
 	"github.com/wqvoon/cbox/pkg/utils"
 	"golang.org/x/sys/unix"
 )
 
-func (c *Container) Start(input ...string) {
+func (c *Container) Start() {
 	if os.Geteuid() != 0 {
 		log.Errorln("only root user can start a container")
 	}
 
 	containerMntPoint := rootdir.GetContainerMountPath(c.ID)
 	driver.D.Mount(containerMntPoint, c.Image.Layers...)
+
+	runtimeCmd.Run(c.ID)
+}
+
+func (c *Container) Exec(input ...string) {
+	if os.Geteuid() != 0 {
+		log.Errorln("only root user can exec a container")
+	}
 
 	var name string
 	var args []string
@@ -28,7 +39,32 @@ func (c *Container) Start(input ...string) {
 		name, args = utils.ParseCmd(c.Entrypoint...)
 	}
 
-	cmd.Run(c.ID, name, args)
+	enterNamespace(c.ID)
+
+	// 需要保证在 ExtractCmdFromOSArgs 前进行 Env 的处理，这样得到的 cmd 才是正确的
+	os.Clearenv()
+	for _, oneEnv := range c.Env {
+		envPair := strings.Split(oneEnv, "=")
+		key, val := envPair[0], envPair[1]
+		os.Setenv(key, val)
+	}
+
+	// 这里需要保证在 ExtractCmdFromOSArgs 前进行 chroot，这样得到的 cmd 才是正确的
+	unix.Chroot(rootdir.GetContainerMountPath(c.ID))
+
+	cmd := exec.Command(name, args...)
+	{
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Dir = "/"
+		cmd.Env = c.Env
+	}
+
+	if err := cmd.Run(); err != nil {
+		// 这里不进行 Errorln，用于避免 Ctrl+C 后 Ctrl+D 引起的常见错误
+		log.Println("an error may have occurred while running container:", err)
+	}
 }
 
 func (c *Container) Stop() {
@@ -47,6 +83,12 @@ func (c *Container) Stop() {
 			log.Errorf("failed to unmount %q, err: %v\n", dstPath, err)
 		}
 	}
+
+	info := runtimeUtils.GetContainerInfo(c.ID)
+	if err := info.GetProcess().Kill(); err != nil {
+		log.Errorln("failed to kill runtime process ,err:", err)
+	}
+	info.SavePid(runtimeUtils.STOPPED_PID)
 }
 
 func (c *Container) Delete() {

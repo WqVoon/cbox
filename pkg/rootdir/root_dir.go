@@ -82,6 +82,11 @@ func GetContainerLayoutPath(containerID string) string {
 
 //----- Container Layout Start -----
 
+// container 的 info 文件，内部保存运行时的相关信息
+func GetContainerInfoPath(containerID string) string {
+	return path.Join(GetContainerLayoutPath(containerID), "info")
+}
+
 // container 的 ns 文件夹，内部绑定挂载了容器对应的 ns
 func GetContainerNSPath(containerID string) string {
 	return path.Join(GetContainerLayoutPath(containerID), "ns")

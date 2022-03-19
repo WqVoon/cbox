@@ -5,15 +5,20 @@ import (
 	"os/exec"
 
 	"github.com/wqvoon/cbox/pkg/log"
+	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
 	"golang.org/x/sys/unix"
 )
 
-func Run(containerID string, name string, args []string) {
+// 启动 containerID 对应的容器
+// 创建一个 runtime 进程来设置容器的运行时状态
+func Run(containerID string) {
 	exePath := "/proc/self/exe"
 
 	cmd := &exec.Cmd{
 		Path: exePath,
-		Args: append([]string{exePath, containerID, name}, args...),
+
+		// 这里目前真正有效的只有 exePath 和 containerID，后面的内容只是帮助调试
+		Args: []string{exePath, containerID, "/* cbox's runtime */"},
 
 		Stdin:  os.Stdin,
 		Stdout: os.Stdout,
@@ -28,7 +33,10 @@ func Run(containerID string, name string, args []string) {
 		},
 	}
 
-	if err := cmd.Run(); err != nil {
-		log.Errorln("faild to run runtime, err:", err)
+	// 由于 runtime 进程应该运行在后台，所以这里使用 Start
+	if err := cmd.Start(); err != nil {
+		log.Errorln("faild to start runtime, err:", err)
 	}
+
+	runtimeUtils.GetContainerInfo(containerID).SavePid(cmd.Process.Pid)
 }
