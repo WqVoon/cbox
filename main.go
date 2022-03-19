@@ -47,6 +47,20 @@ func main() {
 			image.GetImage(utils.GetNameTag(imageNameTag)), containerName,
 		)
 		c.Start()
+		time.Sleep(1 * time.Second)
+		c.Exec()
+
+	case "create":
+		imageNameTag, containerName := args[1], args[2]
+		container.CreateContainer(
+			image.GetImage(utils.GetNameTag(imageNameTag)), containerName,
+		)
+		log.Println("container created")
+
+	case "start": // by name
+		name := args[1]
+		c = container.GetContainerByName(name)
+		c.Start()
 		log.Println("container started")
 
 	case "exec": // by name, run entrypoint

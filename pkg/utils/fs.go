@@ -10,6 +10,11 @@ import (
 	"github.com/wqvoon/cbox/pkg/log"
 )
 
+func PathIsExist(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
+
 func GetObjFromJsonFile(filePath string, obj interface{}) {
 	if _, err := os.Stat(filePath); err != nil {
 		log.Errorln("faild to stat json file, err:", err)
