@@ -74,6 +74,9 @@ func main() {
 		name := args[1]
 		c = container.GetContainerByName(name)
 		c.Delete()
+
+	case "ps":
+		container.ListAllContainer()
 	}
 
 }

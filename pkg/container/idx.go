@@ -62,3 +62,12 @@ func (c ContainerIdx) GetByID(id string) (string, *ContainerEntity) {
 	log.Errorln("no such container in containerIdx:", id)
 	return "", nil
 }
+
+// 遍历所有的记录，如果 fn 返回 false 那么提前结束遍历
+func (c ContainerIdx) Range(fn func(string, *ContainerEntity) bool) {
+	for name, entity := range c {
+		if !fn(name, entity) {
+			break
+		}
+	}
+}

@@ -2,10 +2,12 @@ package container
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/wqvoon/cbox/pkg/image"
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
+	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
 )
 
 // func MountFSByRawCopy(manifest image.Manifest, containerID string) {
@@ -88,4 +90,39 @@ func getContainerHelper(img *image.Image, containerID, containerName string) *Co
 		Entrypoint: img.Config.Config.Cmd,
 		Image:      img,
 	}
+}
+
+// 展示所有的 container 信息，类似于 `docker ps`，每个字段占 16 个字符长度
+// TODO：后面可以加一些 filter，并且以表格的形式输出
+func ListAllContainer() {
+
+	// 获取合适的输出格式
+	fixSpaces := func(name string) string {
+		const spaces = "                " // 16 个空格
+
+		length := len(name)
+		if length > 12 {
+			return name[:12] + "... "
+		}
+		return name + spaces[length:]
+	}
+
+	const header = "CONTAINER_NAME  CONTAINER_ID    IMAGE           COMMAND         RUNNING"
+	log.Println(header)
+
+	GetContainerIdx().Range(func(name string, entity *ContainerEntity) bool {
+		c := GetContainerByName(name)
+
+		containerName := fixSpaces(c.Name)
+		containerID := fixSpaces(c.ID)
+		imageName := fixSpaces(image.GetImageIdx().GetImageNameTag(entity.ImageHash).String())
+		command := fixSpaces(fmt.Sprint(c.Entrypoint))
+		status := fixSpaces(fmt.Sprint(runtimeUtils.GetContainerInfo(c.ID).IsRunning()))
+
+		log.Println(strings.Join([]string{
+			containerName, containerID, imageName, command, status,
+		}, ""))
+
+		return true
+	})
 }
