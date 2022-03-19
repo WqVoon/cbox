@@ -52,14 +52,14 @@ func CreateContainer(img *image.Image, name string) *Container {
 
 // TODO: 新增一个 GetContainer 方法，依次按 name、id 搜索
 func GetContainerByName(name string) *Container {
-	name, entity := GetContainerIdx().GetAllByName(name)
+	name, entity := GetContainerIdx().GetByName(name)
 	img := image.GetImageFromLocalByHash(entity.ImageHash)
 
 	return getContainerHelper(img, entity.ContainerID, name)
 }
 
 func GetContainerByID(id string) *Container {
-	name, entity := GetContainerIdx().GetAllByID(id)
+	name, entity := GetContainerIdx().GetByID(id)
 	img := image.GetImageFromLocalByHash(entity.ImageHash)
 
 	return getContainerHelper(img, id, name)

@@ -42,7 +42,7 @@ func (c ContainerIdx) Has(containerName string) bool {
 	return has
 }
 
-func (c ContainerIdx) GetAllByName(name string) (string, *ContainerEntity) {
+func (c ContainerIdx) GetByName(name string) (string, *ContainerEntity) {
 	if entity, isIn := c[name]; isIn {
 		return name, entity
 	}
@@ -52,7 +52,7 @@ func (c ContainerIdx) GetAllByName(name string) (string, *ContainerEntity) {
 }
 
 // TODO：可以像 Docker 一样做前缀匹配
-func (c ContainerIdx) GetAllByID(id string) (string, *ContainerEntity) {
+func (c ContainerIdx) GetByID(id string) (string, *ContainerEntity) {
 	for name, entity := range c {
 		if entity.ContainerID == id {
 			return name, entity
