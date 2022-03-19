@@ -7,7 +7,6 @@ import (
 	"github.com/wqvoon/cbox/pkg/container"
 	"github.com/wqvoon/cbox/pkg/flags"
 	"github.com/wqvoon/cbox/pkg/image"
-	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/runtime"
 	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
@@ -55,13 +54,11 @@ func main() {
 		container.CreateContainer(
 			image.GetImage(utils.GetNameTag(imageNameTag)), containerName,
 		)
-		log.Println("container created")
 
 	case "start": // by name
 		name := args[1]
 		c = container.GetContainerByName(name)
 		c.Start()
-		log.Println("container started")
 
 	case "exec": // by name, run entrypoint
 		name := args[1]
@@ -72,13 +69,11 @@ func main() {
 		name := args[1]
 		c = container.GetContainerByName(name)
 		c.Stop()
-		log.Println("container stopped")
 
 	case "delete": // by name
 		name := args[1]
 		c = container.GetContainerByName(name)
 		c.Delete()
-		log.Println("container deleted")
 	}
 
 }

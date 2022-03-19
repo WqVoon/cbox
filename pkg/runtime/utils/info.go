@@ -9,7 +9,7 @@ import (
 )
 
 // 在容器停止时会将 containerInfo.Pid 设置为此值
-const STOPPED_PID = -1
+const STOPPED_PID = 0
 
 func GetContainerInfo(containerID string) *ContainerInfo {
 	infoPath := rootdir.GetContainerInfoPath(containerID)
@@ -28,6 +28,11 @@ type ContainerInfo struct {
 
 	// runtime 进程的 pid，被 runtime.Run 写入
 	Pid int `json:"pid"`
+}
+
+// 判断 Container 是否在运行中
+func (ci *ContainerInfo) IsRunning() bool {
+	return ci.Pid != STOPPED_PID
 }
 
 // 获取 pid 对应的 Process 对象

@@ -16,6 +16,11 @@ import (
 )
 
 func (c *Container) Start() {
+	if runtimeUtils.GetContainerInfo(c.ID).IsRunning() {
+		log.Errorln("can not start a running container")
+		return
+	}
+
 	if os.Geteuid() != 0 {
 		log.Errorln("only root user can start a container")
 	}
@@ -24,9 +29,16 @@ func (c *Container) Start() {
 	driver.D.Mount(containerMntPoint, c.Image.Layers...)
 
 	runtimeCmd.Run(c.ID)
+
+	log.Println("container started")
 }
 
 func (c *Container) Exec(input ...string) {
+	if !runtimeUtils.GetContainerInfo(c.ID).IsRunning() {
+		log.Errorln("can not exec a not-running container")
+		return
+	}
+
 	if os.Geteuid() != 0 {
 		log.Errorln("only root user can exec a container")
 	}
@@ -68,6 +80,11 @@ func (c *Container) Exec(input ...string) {
 }
 
 func (c *Container) Stop() {
+	if !runtimeUtils.GetContainerInfo(c.ID).IsRunning() {
+		log.Errorln("can not stop a not-running container")
+		return
+	}
+
 	mntPath := rootdir.GetContainerMountPath(c.ID)
 
 	procPath := path.Join(mntPath, "proc")
@@ -89,14 +106,21 @@ func (c *Container) Stop() {
 		log.Errorln("failed to kill runtime process ,err:", err)
 	}
 	info.SavePid(runtimeUtils.STOPPED_PID)
+
+	log.Println("container stopped")
 }
 
 func (c *Container) Delete() {
-	// TODO: 先检测是否执行过 Stop
+	if runtimeUtils.GetContainerInfo(c.ID).IsRunning() {
+		log.Errorln("can not delete a running container")
+		return
+	}
 
 	GetContainerIdx().DeleteByName(c.Name)
 	if err := os.RemoveAll(c.rootPath); err != nil {
 		log.Errorf("faild to remove container %q, err: %v\n", c.Name, err)
 	}
 	// TODO: 后面要处理更多的运行时副作用
+
+	log.Println("container deleted")
 }
