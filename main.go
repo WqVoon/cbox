@@ -34,7 +34,7 @@ func main() {
 		c.Start()
 		// TODO: 这里先等1秒，后面整个更优雅的做法
 		time.Sleep(1 * time.Second)
-		c.Exec()
+		c.Exec(args[1:]...)
 
 	case "done": // 停止，删除一条龙服务（for test）
 		c = container.GetContainerByName("test")
@@ -48,7 +48,7 @@ func main() {
 		)
 		c.Start()
 		time.Sleep(1 * time.Second)
-		c.Exec()
+		c.Exec(args[3:]...)
 
 	case "create":
 		imageNameTag, containerName := args[1], args[2]
@@ -66,7 +66,7 @@ func main() {
 	case "exec": // by name, run entrypoint
 		name := args[1]
 		c = container.GetContainerByName(name)
-		c.Exec()
+		c.Exec(args[2:]...)
 
 	case "stop": // by name
 		name := args[1]
