@@ -13,8 +13,6 @@ import (
 
 // 这个函数只能在 RuntimeMode 下使用
 func Handle() {
-	log.Println("Enter RuntimeMode, args:", os.Args)
-
 	c := container.GetContainerByID(os.Args[1])
 
 	// 这里就不 Error 了，仅做个提醒，也不是啥大事

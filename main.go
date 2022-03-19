@@ -11,7 +11,6 @@ import (
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/runtime"
 	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
-	"github.com/wqvoon/cbox/pkg/storage/driver"
 	"github.com/wqvoon/cbox/pkg/utils"
 )
 
@@ -21,12 +20,7 @@ func main() {
 	}
 
 	flags.ParseAll()
-
-	log.Println("Hello cbox!")
-	log.Printf("use %q as storage driver", driver.D)
-
 	rootdir.Init()
-	log.Println("successfully create root dir:", rootdir.GetRootPath())
 
 	args := flag.Args()
 	cmd := args[0]
@@ -53,6 +47,7 @@ func main() {
 			image.GetImage(utils.GetNameTag(imageNameTag)), containerName,
 		)
 		c.Start()
+		log.Println("container started")
 
 	case "exec": // by name, run entrypoint
 		name := args[1]
@@ -63,11 +58,13 @@ func main() {
 		name := args[1]
 		c = container.GetContainerByName(name)
 		c.Stop()
+		log.Println("container stopped")
 
 	case "delete": // by name
 		name := args[1]
 		c = container.GetContainerByName(name)
 		c.Delete()
+		log.Println("container deleted")
 	}
 
 }

@@ -61,7 +61,6 @@ func (rc *RawCopy) Mount(dst string, layerPaths ...string) {
 			return nil
 		})
 	}
-	log.Println("copy done")
 }
 
 // 由于是单纯的复制，因此 UnMount 当前不用做操作，因为目录的清理会交给 Container.Delete
