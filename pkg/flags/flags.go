@@ -14,7 +14,7 @@ import (
 var (
 	parsed      = false
 	rootDirPath = flag.String("root_dir", "", "cbox root directory path (default $HOME/cbox-dir)")
-	driverName  = flag.String("storage_driver", "raw_copy", "use which storage driver")
+	driverName  = flag.String("storage_driver", "", "use which storage driver")
 	debug       = flag.Bool("debug", false, "show call stack when run failed")
 )
 
@@ -22,6 +22,7 @@ func ParseAll() {
 	if !parsed {
 		flag.Parse()
 		prepareRootDirPath()
+		prepareDriverName()
 
 		parsed = true
 	}
@@ -50,5 +51,23 @@ func prepareRootDirPath() {
 		}
 
 		*rootDirPath = path.Join(homeDir, "cbox-dir")
+	}
+}
+
+func prepareDriverName() {
+	const driverEnvName = "CBOX_STORAGE_DRIVER"
+	const defaultDriverName = "raw_copy"
+
+	// 命令行的 flag 优先
+	if driverName != nil && len(*driverName) != 0 {
+		return
+	}
+
+	// 否则先看环境变量，这里不用 LookupEnv 是为了避免拿到空值
+	*driverName = os.Getenv(driverEnvName)
+
+	// 如果环境变量还没有，就设成默认值
+	if driverName == nil || len(*driverName) == 0 {
+		*driverName = defaultDriverName
 	}
 }
