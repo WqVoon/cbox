@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
@@ -106,6 +107,11 @@ func (c *Container) Stop() {
 		log.Errorln("failed to kill runtime process ,err:", err)
 	}
 	info.SavePid(runtimeUtils.STOPPED_PID)
+
+	// UnMount 必须在 Kill 之后，否则会报 device busy（至少对于 Overlay2 来说）
+	// TODO: 这里简单等待100ms，后面整个更稳妥的办法确保进程退出后再执行 UnMount
+	time.Sleep(100 * time.Millisecond)
+	driver.D.UnMount(mntPath)
 
 	log.Printf("container %s stopped\n", c.Name)
 }
