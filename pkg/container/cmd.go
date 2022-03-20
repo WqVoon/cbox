@@ -30,7 +30,7 @@ func (c *Container) Start() {
 
 	runtimeCmd.Run(c.ID)
 
-	log.Println("container started")
+	log.Printf("container %s started\n", c.Name)
 }
 
 func (c *Container) Exec(input ...string) {
@@ -107,7 +107,7 @@ func (c *Container) Stop() {
 	}
 	info.SavePid(runtimeUtils.STOPPED_PID)
 
-	log.Println("container stopped")
+	log.Printf("container %s stopped\n", c.Name)
 }
 
 func (c *Container) Delete() {
@@ -122,5 +122,5 @@ func (c *Container) Delete() {
 	}
 	// TODO: 后面要处理更多的运行时副作用
 
-	log.Println("container deleted")
+	log.Printf("container %s deleted\n", c.Name)
 }

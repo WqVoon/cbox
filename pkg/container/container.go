@@ -47,7 +47,7 @@ func CreateContainer(img *image.Image, name string) *Container {
 	idx.Save()
 
 	createContainerLayout(containerID)
-	log.Println("create container", containerID)
+	log.Printf("create container %s(%s)\n", name, containerID)
 
 	return getContainerHelper(img, containerID, name)
 }

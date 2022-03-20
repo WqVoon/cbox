@@ -56,9 +56,7 @@ func main() {
 		)
 
 	case "start": // by name
-		name := args[1]
-		c = container.GetContainerByName(name)
-		c.Start()
+		container.StartContainersByName(args[1:]...)
 
 	case "exec": // by name, run entrypoint
 		name := args[1]
@@ -66,14 +64,10 @@ func main() {
 		c.Exec(args[2:]...)
 
 	case "stop": // by name
-		name := args[1]
-		c = container.GetContainerByName(name)
-		c.Stop()
+		container.StopContainersByName(args[1:]...)
 
 	case "delete": // by name
-		name := args[1]
-		c = container.GetContainerByName(name)
-		c.Delete()
+		container.DeleteContainersByName(args[1:]...)
 
 	case "ps":
 		container.ListAllContainer()

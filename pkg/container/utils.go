@@ -63,3 +63,21 @@ func enterNamespace(containerID string) {
 	pidFd.Close()
 	utsFd.Close()
 }
+
+func StartContainersByName(names ...string) {
+	for _, name := range names {
+		GetContainerByName(name).Start()
+	}
+}
+
+func StopContainersByName(names ...string) {
+	for _, name := range names {
+		GetContainerByName(name).Stop()
+	}
+}
+
+func DeleteContainersByName(names ...string) {
+	for _, name := range names {
+		GetContainerByName(name).Delete()
+	}
+}
