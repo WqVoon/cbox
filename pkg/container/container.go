@@ -8,6 +8,7 @@ import (
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
+	"github.com/wqvoon/cbox/pkg/storage/driver"
 )
 
 // func MountFSByRawCopy(manifest image.Manifest, containerID string) {
@@ -47,6 +48,9 @@ func CreateContainer(img *image.Image, name string) *Container {
 	idx.Save()
 
 	createContainerLayout(containerID)
+
+	runtimeUtils.GetContainerInfo(containerID).SaveStorageDriver(driver.D.String())
+
 	log.Printf("create container %s(%s)\n", name, containerID)
 
 	return getContainerHelper(img, containerID, name)
@@ -107,20 +111,22 @@ func ListAllContainer() {
 		return name + spaces[length:]
 	}
 
-	const header = "CONTAINER_NAME  CONTAINER_ID    IMAGE           COMMAND         RUNNING"
+	const header = "CONTAINER_NAME  CONTAINER_ID    IMAGE           COMMAND         RUNNING         DRIVER"
 	log.Println(header)
 
 	GetContainerIdx().Range(func(name string, entity *ContainerEntity) bool {
 		c := GetContainerByName(name)
+		info := runtimeUtils.GetContainerInfo(c.ID)
 
 		containerName := fixSpaces(c.Name)
 		containerID := fixSpaces(c.ID)
 		imageName := fixSpaces(image.GetImageIdx().GetImageNameTag(entity.ImageHash).String())
 		command := fixSpaces(fmt.Sprint(c.Entrypoint))
-		status := fixSpaces(fmt.Sprint(runtimeUtils.GetContainerInfo(c.ID).IsRunning()))
+		status := fixSpaces(fmt.Sprint(info.IsRunning()))
+		driver := fixSpaces(info.StorageDriver)
 
 		log.Println(strings.Join([]string{
-			containerName, containerID, imageName, command, status,
+			containerName, containerID, imageName, command, status, driver,
 		}, ""))
 
 		return true

@@ -17,9 +17,15 @@ import (
 )
 
 func (c *Container) Start() {
-	if runtimeUtils.GetContainerInfo(c.ID).IsRunning() {
-		log.Errorln("can not start a running container")
-		return
+	info := runtimeUtils.GetContainerInfo(c.ID)
+	{
+		if info.IsRunning() {
+			log.Errorln("can not start a running container")
+			return
+		}
+		if info.GetStorageDriver() != driver.D {
+			log.Errorf("can not use %s to start %s", driver.D, c.Name)
+		}
 	}
 
 	if os.Geteuid() != 0 {
@@ -81,9 +87,15 @@ func (c *Container) Exec(input ...string) {
 }
 
 func (c *Container) Stop() {
-	if !runtimeUtils.GetContainerInfo(c.ID).IsRunning() {
-		log.Errorln("can not stop a not-running container")
-		return
+	info := runtimeUtils.GetContainerInfo(c.ID)
+	{
+		if !info.IsRunning() {
+			log.Errorln("can not stop a not-running container")
+			return
+		}
+		if info.GetStorageDriver() != driver.D {
+			log.Errorf("can not use %s to stop %s", driver.D, c.Name)
+		}
 	}
 
 	mntPath := rootdir.GetContainerMountPath(c.ID)
@@ -102,7 +114,6 @@ func (c *Container) Stop() {
 		}
 	}
 
-	info := runtimeUtils.GetContainerInfo(c.ID)
 	if err := info.GetProcess().Kill(); err != nil {
 		log.Errorln("failed to kill runtime process ,err:", err)
 	}

@@ -40,10 +40,15 @@ func init() {
 	flags.ParseAll()
 
 	driverName := flags.GetStorageDriver()
-	var isIn bool
 
-	D, isIn = registeredDrivers[driverName]
+	D = GetDriverByName(driverName)
+}
+
+func GetDriverByName(driverName string) Interface {
+	driver, isIn := registeredDrivers[driverName]
 	if !isIn {
 		log.Errorln("no such storage driver:", driverName)
 	}
+
+	return driver
 }

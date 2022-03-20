@@ -5,6 +5,7 @@ import (
 
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
+	"github.com/wqvoon/cbox/pkg/storage/driver"
 	"github.com/wqvoon/cbox/pkg/utils"
 )
 
@@ -28,6 +29,9 @@ type ContainerInfo struct {
 
 	// runtime 进程的 pid，被 runtime.Run 写入
 	Pid int `json:"pid"`
+
+	// 采用了哪个 StorageDriver，在 Container 创建时确定，不可更改
+	StorageDriver string `json:"storage_driver"`
 }
 
 // 判断 Container 是否在运行中
@@ -49,8 +53,22 @@ func (ci *ContainerInfo) GetProcess() *os.Process {
 	return p
 }
 
+func (ci *ContainerInfo) GetStorageDriver() driver.Interface {
+	if len(ci.StorageDriver) == 0 {
+		log.Errorln("invalid StorageDriver")
+	}
+
+	return driver.GetDriverByName(ci.StorageDriver)
+}
+
 func (ci *ContainerInfo) SavePid(pid int) {
 	ci.Pid = pid
+	ci.save()
+}
+
+// 这个方法仅应该被 container.CreateContainer 使用
+func (ci *ContainerInfo) SaveStorageDriver(driverName string) {
+	ci.StorageDriver = driverName
 	ci.save()
 }
 
