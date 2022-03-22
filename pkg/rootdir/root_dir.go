@@ -21,6 +21,8 @@ func Init() {
 
 		utils.WriteFileIfNotExist(path, data)
 	}
+
+	utils.CreateDirIfNotExist(path.Join(rootPath, "tarballs"))
 }
 
 var GetRootPath = flags.GetRootDirPath
@@ -38,6 +40,15 @@ func GetImageIdxPath() string { return path.Join(GetImageRootPath(), "idx.json")
 
 // image 的 Layout，内部有 manifest.json 文件、image config 文件、image fs 文件夹
 func GetImageLayoutPath(imageHash string) string { return path.Join(GetImageRootPath(), imageHash) }
+
+//----- Image Layout Start -----
+
+// 获取 Image 的 FS 路径，解包后的文件就放在这里
+func GetImageFsPath(imageHash, layerPath string) string {
+	return path.Join(GetImageLayoutPath(imageHash), layerPath, "fs")
+}
+
+//----- Image Layout End -----
 
 //----- Image Layout Start -----
 
@@ -111,3 +122,13 @@ func GetContainerMountPath(containerID string) string {
 //---------- Container Root End ----------
 
 //--------------- Container End ---------------
+
+// 获取 cbox-dir 中 tarballs 文件夹的路径
+func GetTarballRootPath() string {
+	return path.Join(GetRootPath(), "tarballs")
+}
+
+// 获取 tarballs 文件夹中某个 Image 的路径
+func GetImageTarballPath(imgHash string) string {
+	return path.Join(GetTarballRootPath(), imgHash, "image.tar")
+}

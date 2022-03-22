@@ -53,3 +53,20 @@ func (idx ImageIdx) GetImageNameTag(wantHash string) *utils.NameTag {
 	log.Errorln("no such image in imageIdx:", wantHash)
 	return nil
 }
+
+// 尝试更新，如果确实更新了那么返回 true，如果现有的值等同于 imageHash 参数，那么返回 false
+func (idx ImageIdx) Update(nameTag *utils.NameTag, newHash string) bool {
+	if entity, isIn := idx[nameTag.Name]; isIn {
+		oldHash := entity[nameTag.Tag]
+		if oldHash == newHash {
+			return false
+		}
+
+		entity[nameTag.Tag] = newHash
+	} else {
+		idx[nameTag.Name] = ImageEntity{nameTag.Tag: newHash}
+	}
+
+	utils.SaveObjToJsonFile(rootdir.GetImageIdxPath(), idx)
+	return true
+}

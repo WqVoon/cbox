@@ -71,6 +71,10 @@ func main() {
 
 	case "ps":
 		container.ListAllContainer()
+
+	case "pull":
+		image.Pull(utils.GetNameTag(args[1]))
+
 	}
 
 }

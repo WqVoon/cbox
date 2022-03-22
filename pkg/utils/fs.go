@@ -62,6 +62,10 @@ func WriteFileIfNotExist(filePath string, content []byte) {
 		}
 		defer file.Close()
 
+		if len(content) == 0 {
+			return
+		}
+
 		if _, err = file.Write(content); err != nil {
 			log.Errorln("faild to write file, err:", err)
 		}
