@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 
 	"github.com/wqvoon/cbox/pkg/log"
+	"github.com/wqvoon/cbox/pkg/rootdir"
 	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
 	"golang.org/x/sys/unix"
 )
@@ -13,12 +15,13 @@ import (
 // 创建一个 runtime 进程来设置容器的运行时状态
 func Run(containerID string) {
 	exePath := "/proc/self/exe"
+	rootdirFlag := fmt.Sprintf("--root_dir=%s", rootdir.GetRootPath())
 
 	cmd := &exec.Cmd{
 		Path: exePath,
 
 		// 这里目前真正有效的只有 exePath 和 containerID，后面的内容只是帮助调试
-		Args: []string{exePath, containerID, "/* cbox's runtime */"},
+		Args: []string{exePath, rootdirFlag, containerID, "/* cbox's runtime */"},
 
 		Stdin:  os.Stdin,
 		Stdout: os.Stdout,

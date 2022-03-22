@@ -14,12 +14,12 @@ import (
 )
 
 func main() {
+	flags.ParseAll()
+	rootdir.Init()
+
 	if runtimeUtils.IsRuntimeMode() {
 		runtime.Handle()
 	}
-
-	flags.ParseAll()
-	rootdir.Init()
 
 	args := flag.Args()
 	cmd := args[0]

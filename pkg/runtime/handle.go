@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"flag"
 	"os"
 	"strings"
 
@@ -13,7 +14,7 @@ import (
 
 // 这个函数只能在 RuntimeMode 下使用
 func Handle() {
-	c := container.GetContainerByID(os.Args[1])
+	c := container.GetContainerByID(flag.Arg(0))
 
 	// 这里就不 Error 了，仅做个提醒，也不是啥大事
 	if err := unix.Sethostname([]byte(c.ID)); err != nil {
