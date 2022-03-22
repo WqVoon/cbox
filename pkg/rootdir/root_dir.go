@@ -2,13 +2,19 @@ package rootdir
 
 import (
 	"path"
+	"path/filepath"
 
 	"github.com/wqvoon/cbox/pkg/flags"
+	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/utils"
 )
 
 func Init() {
 	rootPath := flags.GetRootDirPath()
+	if !filepath.IsAbs(rootPath) {
+		log.Errorln("root_dir must be a absolute path")
+	}
+
 	subPaths := []string{
 		path.Join("containers", "idx.json"),
 		path.Join("images", "idx.json"),
