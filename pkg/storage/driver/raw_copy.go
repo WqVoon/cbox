@@ -17,6 +17,10 @@ type RawCopy struct{}
 
 // TODO: 这里单纯做复制，暂不考虑 upper layer 删除了 lower layer 中的文件的场景
 func (rc *RawCopy) Mount(dst string, layerPaths ...string) {
+	if len(layerPaths) != 1 {
+		log.Println("[WARNING] `raw_copy` driver may not work properly in multi-layer image")
+	}
+
 	for _, layerPath := range layerPaths {
 		filepath.WalkDir(layerPath, func(p string, d fs.DirEntry, err error) error {
 			if p == layerPath {
