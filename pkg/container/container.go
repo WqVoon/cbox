@@ -2,13 +2,13 @@ package container
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/wqvoon/cbox/pkg/image"
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
 	"github.com/wqvoon/cbox/pkg/storage/driver"
+	"github.com/wqvoon/cbox/pkg/utils"
 )
 
 // func MountFSByRawCopy(manifest image.Manifest, containerID string) {
@@ -99,36 +99,24 @@ func getContainerHelper(img *image.Image, containerID, containerName string) *Co
 // 展示所有的 container 信息，类似于 `docker ps`，每个字段占 16 个字符长度
 // TODO：后面可以加一些 filter，并且以表格的形式输出
 func ListAllContainer() {
+	tw := utils.NewTableWriter([]string{
+		"container name", "container id", "image", "command", "running", "driver",
+	}, 16)
 
-	// 获取合适的输出格式
-	fixSpaces := func(name string) string {
-		const spaces = "                " // 16 个空格
-
-		length := len(name)
-		if length > 12 {
-			return name[:12] + "... "
-		}
-		return name + spaces[length:]
-	}
-
-	const header = "CONTAINER_NAME  CONTAINER_ID    IMAGE           COMMAND         RUNNING         DRIVER"
-	log.Println(header)
+	tw.PrintlnHeader()
 
 	GetContainerIdx().Range(func(name string, entity *ContainerEntity) bool {
 		c := GetContainerByName(name)
 		info := runtimeUtils.GetContainerInfo(c.ID)
 
-		containerName := fixSpaces(c.Name)
-		containerID := fixSpaces(c.ID)
-		imageName := fixSpaces(image.GetImageIdx().GetImageNameTag(entity.ImageHash).String())
-		command := fixSpaces(fmt.Sprint(c.Entrypoint))
-		status := fixSpaces(fmt.Sprint(info.IsRunning()))
-		driver := fixSpaces(info.StorageDriver)
+		containerName := c.Name
+		containerID := c.ID
+		imageName := image.GetImageIdx().GetImageNameTag(entity.ImageHash).String()
+		command := fmt.Sprint(c.Entrypoint)
+		status := fmt.Sprint(info.IsRunning())
+		driver := info.StorageDriver
 
-		log.Println(strings.Join([]string{
-			containerName, containerID, imageName, command, status, driver,
-		}, ""))
-
+		tw.PrintlnData(containerName, containerID, imageName, command, status, driver)
 		return true
 	})
 }

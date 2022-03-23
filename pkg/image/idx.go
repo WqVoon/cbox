@@ -70,3 +70,13 @@ func (idx ImageIdx) Update(nameTag *utils.NameTag, newHash string) bool {
 	utils.SaveObjToJsonFile(rootdir.GetImageIdxPath(), idx)
 	return true
 }
+
+func (idx ImageIdx) Range(fn func(repo, tag, hash string) bool) {
+	for repo, entity := range idx {
+		for tag, hash := range entity {
+			if !fn(repo, tag, hash) {
+				return
+			}
+		}
+	}
+}

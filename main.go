@@ -75,6 +75,9 @@ func main() {
 	case "pull":
 		image.Pull(utils.GetNameTag(args[1]))
 
+	case "images":
+		image.ListAllImage()
+
 	}
 
 }
