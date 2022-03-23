@@ -67,7 +67,7 @@ func (idx ImageIdx) Update(nameTag *utils.NameTag, newHash string) bool {
 		idx[nameTag.Name] = ImageEntity{nameTag.Tag: newHash}
 	}
 
-	utils.SaveObjToJsonFile(rootdir.GetImageIdxPath(), idx)
+	idx.save()
 	return true
 }
 
@@ -80,3 +80,15 @@ func (idx ImageIdx) Range(fn func(repo, tag, hash string) bool) {
 		}
 	}
 }
+
+func (idx ImageIdx) DeleteByNameTag(nameTag *utils.NameTag) {
+	name, tag := nameTag.Name, nameTag.Tag
+
+	if entity, isIn := idx[name]; isIn {
+		delete(entity, tag)
+	}
+
+	idx.save()
+}
+
+func (idx ImageIdx) save() { utils.SaveObjToJsonFile(rootdir.GetImageIdxPath(), idx) }

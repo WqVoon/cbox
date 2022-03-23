@@ -64,17 +64,3 @@ func getImageHelper(nameTag *utils.NameTag, hash string) *Image {
 		Layers:   manifest.GetLayerFSPaths(),
 	}
 }
-
-// TODO: 同样的，后面可以加一些 filter
-func ListAllImage() {
-	tw := utils.NewTableWriter([]string{
-		"repository", "tag", "image id",
-	}, 32)
-
-	tw.PrintlnHeader()
-
-	GetImageIdx().Range(func(repo, tag, hash string) bool {
-		tw.PrintlnData(repo, tag, hash)
-		return true
-	})
-}

@@ -40,7 +40,7 @@ func main() {
 		c.Stop()
 		c.Delete()
 
-	case "run": // create + start
+	case "run": // create + start，默认运行 entrypoint，命令格式 `cbox run <IMAGE> <CONTAINER> [...args]`
 		imageNameTag, containerName := args[1], args[2]
 		c = container.CreateContainer(
 			image.GetImage(utils.GetNameTag(imageNameTag)), containerName,
@@ -49,35 +49,37 @@ func main() {
 		time.Sleep(1 * time.Second)
 		c.Exec(args[3:]...)
 
-	case "create":
+	case "create": // 创建容器，命令格式 `cbox create <IMAGE> <CONTAINER>`
 		imageNameTag, containerName := args[1], args[2]
 		container.CreateContainer(
 			image.GetImage(utils.GetNameTag(imageNameTag)), containerName,
 		)
 
-	case "start": // by name
+	case "start": // 启动容器，命令格式 `cbox start <CONTAINER>`
 		container.StartContainersByName(args[1:]...)
 
-	case "exec": // by name, run entrypoint
+	case "exec": // 在容器环境下执行命令, 默认运行 entrypoint，命令格式 `cbox exec <CONTAINER> [...args]`
 		name := args[1]
 		c = container.GetContainerByName(name)
 		c.Exec(args[2:]...)
 
-	case "stop": // by name
+	case "stop": // 停止容器，命令格式 `cbox stop <CONTAINER> [...<CONTAINER>]`
 		container.StopContainersByName(args[1:]...)
 
-	case "delete": // by name
+	case "rm": // 删除容器，命令格式 `cbox rm <CONTAINER> [...<CONTAINER>]`
 		container.DeleteContainersByName(args[1:]...)
 
-	case "ps":
+	case "ps": // 列出所有的容器，命令格式 `cbox ps`
 		container.ListAllContainer()
 
-	case "pull":
+	case "pull": // 拉取镜像到本地，命令格式 `cbox pull <CONTAINER>`
 		image.Pull(utils.GetNameTag(args[1]))
 
-	case "images":
+	case "images": // 列出本地所有镜像，命令格式 `cbox images`
 		image.ListAllImage()
 
+	case "rmi": // 删除本地的镜像，命令格式 `cbox rmi <IMAGE> [...<IMAGE>]`
+		image.DeleteImagesNyName(args[1:]...)
 	}
 
 }

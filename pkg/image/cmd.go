@@ -1,6 +1,7 @@
 package image
 
 import (
+	"os"
 	"path"
 	"path/filepath"
 
@@ -71,4 +72,35 @@ func Pull(nameTag *utils.NameTag) {
 	}).Start()
 
 	log.Println("success download image for", nameTag)
+}
+
+// TODO: 同样的，后面可以加一些 filter
+func ListAllImage() {
+	tw := utils.NewTableWriter([]string{
+		"repository", "tag", "image id",
+	}, 32)
+
+	tw.PrintlnHeader()
+
+	GetImageIdx().Range(func(repo, tag, hash string) bool {
+		tw.PrintlnData(repo, tag, hash)
+		return true
+	})
+}
+
+func DeleteImagesNyName(names ...string) {
+	imgIdx := GetImageIdx()
+
+	for _, name := range names {
+		// TODO: 检测是否使用中
+		nameTag := utils.GetNameTag(name)
+		imgHash := imgIdx.GetImageHash(nameTag)
+
+		if err := os.RemoveAll(rootdir.GetImageLayoutPath(imgHash)); err != nil {
+			log.Errorln("failed to remove image layout, err:", err)
+		}
+		imgIdx.DeleteByNameTag(nameTag)
+
+		log.Println("image", nameTag, "deleted")
+	}
 }
