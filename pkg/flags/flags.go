@@ -14,8 +14,8 @@ import (
 var (
 	parsed      = false
 	rootDirPath = flag.String("root_dir", "", "cbox root directory path (default $HOME/cbox-dir)")
-	driverName  = flag.String("storage_driver", "", "use which storage driver")
-	debug       = flag.Bool("debug", false, "show call stack when run failed")
+	driverName  = flag.String("storage_driver", "", "use which storage driver (default raw_copy)")
+	debug       = flag.Bool("debug", false, "show call stack when run failed (default false)")
 )
 
 func ParseAll() {
