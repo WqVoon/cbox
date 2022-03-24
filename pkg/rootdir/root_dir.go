@@ -49,14 +49,15 @@ func GetImageLayoutPath(imageHash string) string { return path.Join(GetImageRoot
 
 //----- Image Layout Start -----
 
+// 获取 Image 的 info 文件路径，内部保存 Image 的运行时信息
+func GetImageInfoPath(imageHash string) string {
+	return path.Join(GetImageLayoutPath(imageHash), "info")
+}
+
 // 获取 Image 的 FS 路径，解包后的文件就放在这里
 func GetImageFsPath(imageHash, layerPath string) string {
 	return path.Join(GetImageLayoutPath(imageHash), layerPath, "fs")
 }
-
-//----- Image Layout End -----
-
-//----- Image Layout Start -----
 
 // image Layout 中的 manife.json 文件
 func GetManifestPath(imageHash string) string {

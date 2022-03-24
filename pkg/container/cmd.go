@@ -10,14 +10,14 @@ import (
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	runtimeCmd "github.com/wqvoon/cbox/pkg/runtime/cmd"
-	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
+	runtimeInfo "github.com/wqvoon/cbox/pkg/runtime/info"
 	"github.com/wqvoon/cbox/pkg/storage/driver"
 	"github.com/wqvoon/cbox/pkg/utils"
 	"golang.org/x/sys/unix"
 )
 
 func (c *Container) Start() {
-	info := runtimeUtils.GetContainerInfo(c.ID)
+	info := runtimeInfo.GetContainerInfo(c.ID)
 	{
 		if info.IsRunning() {
 			log.Errorln("can not start a running container")
@@ -41,7 +41,7 @@ func (c *Container) Start() {
 }
 
 func (c *Container) Exec(input ...string) {
-	if !runtimeUtils.GetContainerInfo(c.ID).IsRunning() {
+	if !runtimeInfo.GetContainerInfo(c.ID).IsRunning() {
 		log.Errorln("can not exec a not-running container")
 		return
 	}
@@ -87,7 +87,7 @@ func (c *Container) Exec(input ...string) {
 }
 
 func (c *Container) Stop() {
-	info := runtimeUtils.GetContainerInfo(c.ID)
+	info := runtimeInfo.GetContainerInfo(c.ID)
 	{
 		if !info.IsRunning() {
 			log.Errorln("can not stop a not-running container")
@@ -128,10 +128,12 @@ func (c *Container) Stop() {
 }
 
 func (c *Container) Delete() {
-	if runtimeUtils.GetContainerInfo(c.ID).IsRunning() {
+	if runtimeInfo.GetContainerInfo(c.ID).IsRunning() {
 		log.Errorln("can not delete a running container")
 		return
 	}
+
+	runtimeInfo.GetImageInfo(c.Image.Hash).MarkReleasedBy(c.ID)
 
 	GetContainerIdx().DeleteByName(c.Name)
 	if err := os.RemoveAll(c.rootPath); err != nil {

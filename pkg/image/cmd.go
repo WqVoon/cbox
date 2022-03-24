@@ -1,14 +1,17 @@
 package image
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 
 	"github.com/google/go-containerregistry/pkg/crane"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
+
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
+	runtimeInfo "github.com/wqvoon/cbox/pkg/runtime/info"
 	"github.com/wqvoon/cbox/pkg/utils"
 )
 
@@ -77,13 +80,17 @@ func Pull(nameTag *utils.NameTag) {
 // TODO: 同样的，后面可以加一些 filter
 func ListAllImage() {
 	tw := utils.NewTableWriter([]string{
-		"repository", "tag", "image id",
-	}, 32)
+		"repository", "tag", "image id", "in using",
+	}, 16)
 
 	tw.PrintlnHeader()
 
 	GetImageIdx().Range(func(repo, tag, hash string) bool {
-		tw.PrintlnData(repo, tag, hash)
+		info := runtimeInfo.GetImageInfo(hash)
+
+		inUsing := fmt.Sprintf("%v", info.BeUsed())
+
+		tw.PrintlnData(repo, tag, hash, inUsing)
 		return true
 	})
 }
@@ -92,9 +99,15 @@ func DeleteImagesNyName(names ...string) {
 	imgIdx := GetImageIdx()
 
 	for _, name := range names {
-		// TODO: 检测是否使用中
 		nameTag := utils.GetNameTag(name)
 		imgHash := imgIdx.GetImageHash(nameTag)
+
+		if info := runtimeInfo.GetImageInfo(imgHash); !info.CanBeDeleted() {
+			log.Errorf(
+				"can not delete image %q, which is used by %v\n",
+				nameTag, info.UsedBy,
+			)
+		}
 
 		if err := os.RemoveAll(rootdir.GetImageLayoutPath(imgHash)); err != nil {
 			log.Errorln("failed to remove image layout, err:", err)

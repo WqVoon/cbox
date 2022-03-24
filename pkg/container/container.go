@@ -6,7 +6,7 @@ import (
 	"github.com/wqvoon/cbox/pkg/image"
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
-	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
+	runtimeInfo "github.com/wqvoon/cbox/pkg/runtime/info"
 	"github.com/wqvoon/cbox/pkg/storage/driver"
 	"github.com/wqvoon/cbox/pkg/utils"
 )
@@ -49,7 +49,8 @@ func CreateContainer(img *image.Image, name string) *Container {
 
 	createContainerLayout(containerID)
 
-	runtimeUtils.GetContainerInfo(containerID).SaveStorageDriver(driver.D.String())
+	runtimeInfo.GetContainerInfo(containerID).SaveStorageDriver(driver.D.String())
+	runtimeInfo.GetImageInfo(img.Hash).MarkUsedBy(containerID)
 
 	log.Printf("create container %s(%s)\n", name, containerID)
 
@@ -107,7 +108,7 @@ func ListAllContainer() {
 
 	GetContainerIdx().Range(func(name string, entity *ContainerEntity) bool {
 		c := GetContainerByName(name)
-		info := runtimeUtils.GetContainerInfo(c.ID)
+		info := runtimeInfo.GetContainerInfo(c.ID)
 
 		containerName := c.Name
 		containerID := c.ID

@@ -7,7 +7,7 @@ import (
 
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
-	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
+	runtimeInfo "github.com/wqvoon/cbox/pkg/runtime/info"
 	"golang.org/x/sys/unix"
 )
 
@@ -41,5 +41,5 @@ func Run(containerID string) {
 		log.Errorln("faild to start runtime, err:", err)
 	}
 
-	runtimeUtils.GetContainerInfo(containerID).SavePid(cmd.Process.Pid)
+	runtimeInfo.GetContainerInfo(containerID).SavePid(cmd.Process.Pid)
 }
