@@ -66,6 +66,11 @@ func (ci *ContainerInfo) SavePid(pid int) {
 	ci.save()
 }
 
+// 标记容器已退出
+func (ci *ContainerInfo) MarkStop() {
+	ci.SavePid(STOPPED_PID)
+}
+
 // 这个方法仅应该被 container.CreateContainer 使用
 func (ci *ContainerInfo) SaveStorageDriver(driverName string) {
 	ci.StorageDriver = driverName
