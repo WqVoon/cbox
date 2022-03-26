@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 )
 
 /*
@@ -52,6 +53,13 @@ func prepareRootDirPath() {
 
 		*rootDirPath = path.Join(homeDir, "cbox-dir")
 	}
+
+	// rootdir 必须是绝对路径
+	absPath, err := filepath.Abs(*rootDirPath)
+	if err != nil {
+		log.Fatalln("failed to get absolute path from", *rootDirPath)
+	}
+	*rootDirPath = absPath
 }
 
 func prepareDriverName() {
