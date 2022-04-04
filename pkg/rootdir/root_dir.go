@@ -122,6 +122,11 @@ func GetContainerMountPath(containerID string) string {
 	return path.Join(GetContainerFSPath(containerID), "mnt")
 }
 
+// 获取 mnt 文件夹中 dns 配置文件的路径，当前仅支持 /etc/resolv.conf
+func GetContainerDNSConfigPath(containerID string) string {
+	return path.Join(GetContainerMountPath(containerID), "etc", "resolv.conf")
+}
+
 // Container FS End
 
 //----- Container Layout End -----

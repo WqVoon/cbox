@@ -32,6 +32,9 @@ type ContainerInfo struct {
 
 	// 采用了哪个 StorageDriver，在 Container 创建时确定，不可更改
 	StorageDriver string `json:"storage_driver"`
+
+	// runtime 传递过来的宿主机 dns 文件路径
+	DNSFilePath string `json:"dns_file"`
 }
 
 // 判断 Container 是否在运行中
@@ -74,6 +77,11 @@ func (ci *ContainerInfo) MarkStop() {
 // 这个方法仅应该被 container.CreateContainer 使用
 func (ci *ContainerInfo) SaveStorageDriver(driverName string) {
 	ci.StorageDriver = driverName
+	ci.save()
+}
+
+func (ci *ContainerInfo) SaveDNSFilePath(filePath string) {
+	ci.DNSFilePath = filePath
 	ci.save()
 }
 

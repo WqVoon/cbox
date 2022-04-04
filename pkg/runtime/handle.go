@@ -6,8 +6,10 @@ import (
 	"strings"
 
 	"github.com/wqvoon/cbox/pkg/container"
+	"github.com/wqvoon/cbox/pkg/flags"
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
+	"github.com/wqvoon/cbox/pkg/runtime/info"
 	"github.com/wqvoon/cbox/pkg/utils"
 	"golang.org/x/sys/unix"
 )
@@ -38,6 +40,13 @@ func Handle() {
 		envPair := strings.Split(oneEnv, "=")
 		key, val := envPair[0], envPair[1]
 		os.Setenv(key, val)
+	}
+
+	containerInfo := info.GetContainerInfo(c.ID)
+	dnsFilePath := flags.GetDNSFilePath()
+	if dnsFilePath != "" {
+		utils.CopyFile(dnsFilePath, rootdir.GetContainerDNSConfigPath(c.ID))
+		containerInfo.SaveDNSFilePath(dnsFilePath)
 	}
 
 	unix.Chroot(rootdir.GetContainerMountPath(c.ID))

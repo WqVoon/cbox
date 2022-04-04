@@ -17,6 +17,7 @@ var (
 	rootDirPath = flag.String("root_dir", "", "cbox root directory path (default $HOME/cbox-dir)")
 	driverName  = flag.String("storage_driver", "", "use which storage driver (default raw_copy)")
 	debug       = flag.Bool("debug", false, "show call stack when run failed (default false)")
+	dnsFilePath = flag.String("dns_file_path", "", "dns configuration file path")
 )
 
 func ParseAll() {
@@ -24,6 +25,7 @@ func ParseAll() {
 		flag.Parse()
 		prepareRootDirPath()
 		prepareDriverName()
+		prepareDNSFilePath()
 
 		parsed = true
 	}
@@ -42,6 +44,10 @@ func IsDebugMode() bool {
 
 func GetStorageDriver() string {
 	return *driverName
+}
+
+func GetDNSFilePath() string {
+	return *dnsFilePath
 }
 
 func prepareRootDirPath() {
@@ -77,5 +83,24 @@ func prepareDriverName() {
 	// 如果环境变量还没有，就设成默认值
 	if driverName == nil || len(*driverName) == 0 {
 		*driverName = defaultDriverName
+	}
+}
+
+func prepareDNSFilePath() {
+	var err error
+	const defaultPath = "/etc/resolv.conf"
+
+	// 说明没有设置过这个 flag，此时应该设置默认值或者退出，否则下面的 Abs 会出问题
+	if *dnsFilePath == "" {
+		if _, err := os.Stat(defaultPath); err == nil {
+			*dnsFilePath = defaultPath
+		}
+		return
+	}
+
+	*dnsFilePath, err = filepath.Abs(*dnsFilePath)
+
+	if err != nil {
+		log.Fatalln("can not convert dnsFilePath to abs path")
 	}
 }

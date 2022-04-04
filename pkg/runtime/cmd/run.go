@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/wqvoon/cbox/pkg/flags"
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	runtimeInfo "github.com/wqvoon/cbox/pkg/runtime/info"
@@ -16,12 +17,13 @@ import (
 func Run(containerID string) {
 	exePath := "/proc/self/exe"
 	rootdirFlag := fmt.Sprintf("--root_dir=%s", rootdir.GetRootPath())
+	dnsFilePath := fmt.Sprintf("--dns_file_path=%s", flags.GetDNSFilePath())
 
 	cmd := &exec.Cmd{
 		Path: exePath,
 
 		// 这里目前真正有效的只有 exePath 和 containerID，后面的内容只是帮助调试
-		Args: []string{exePath, rootdirFlag, containerID, "/* cbox's runtime */"},
+		Args: []string{exePath, rootdirFlag, dnsFilePath, containerID, "/* cbox's runtime */"},
 
 		Stdin:  os.Stdin,
 		Stdout: os.Stdout,

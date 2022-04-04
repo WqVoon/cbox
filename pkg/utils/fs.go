@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -94,5 +95,21 @@ func CopyDirContent(from, to string) {
 	if output, err := cmd.CombinedOutput(); err != nil {
 		log.Println(string(output))
 		log.Errorf("faild to copy %s -> %s, err: %v\n", from, to, err)
+	}
+}
+
+func CopyFile(fromPath, toPath string) {
+	toFile, err := os.OpenFile(toPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0777)
+	if err != nil {
+		log.Errorln("faild to create file", toPath, "err:", err)
+	}
+
+	fromFile, err := os.OpenFile(fromPath, os.O_RDONLY, 0777)
+	if err != nil {
+		log.Errorln("faild to create file", fromPath, "err:", err)
+	}
+
+	if _, err := io.Copy(toFile, fromFile); err != nil {
+		log.Errorf("failed to copy %s -> %s, err: %v\n", fromPath, toPath, err)
 	}
 }
