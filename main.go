@@ -61,7 +61,7 @@ func main() {
 		}, "启动容器，命令格式 `cbox start <CONTAINER>`")
 
 		cmd.RegisterCmd("exec", func(args []string) {
-			name := args[1]
+			name := args[0]
 			c := container.GetContainerByName(name)
 			c.Exec(args[1:]...)
 		}, "在容器环境下执行命令, 默认运行 entrypoint，命令格式 `cbox exec <CONTAINER> [...args]`")
