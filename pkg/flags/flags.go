@@ -51,6 +51,12 @@ func GetDNSFilePath() string {
 }
 
 func prepareRootDirPath() {
+	const rootDirEnvName = "CBOX_ROOT_DIR"
+
+	if rootDirPath == nil || *rootDirPath == "" {
+		*rootDirPath = os.Getenv(rootDirEnvName)
+	}
+
 	if rootDirPath == nil || *rootDirPath == "" {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
