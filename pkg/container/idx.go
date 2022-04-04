@@ -21,7 +21,12 @@ func GetContainerIdx() ContainerIdx {
 	return ret
 }
 
-func (c ContainerIdx) Save() {
+func (c ContainerIdx) Add(name string, entity *ContainerEntity) {
+	c[name] = entity
+	c.save()
+}
+
+func (c ContainerIdx) save() {
 	idxFilePath := rootdir.GetContainerIdxPath()
 
 	utils.SaveObjToJsonFile(idxFilePath, c)
@@ -33,7 +38,7 @@ func (c ContainerIdx) DeleteByName(name string) {
 	}
 
 	delete(c, name)
-	c.Save()
+	c.save()
 }
 
 func (c ContainerIdx) Has(containerName string) bool {

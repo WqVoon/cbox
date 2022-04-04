@@ -41,11 +41,10 @@ func CreateContainer(img *image.Image, name string) *Container {
 		log.Errorln("container name has exists, try another plz")
 	}
 
-	idx[name] = &ContainerEntity{
+	idx.Add(name, &ContainerEntity{
 		ContainerID: containerID,
 		ImageHash:   img.Hash,
-	}
-	idx.Save()
+	})
 
 	createContainerLayout(containerID)
 
