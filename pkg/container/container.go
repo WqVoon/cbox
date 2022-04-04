@@ -11,14 +11,6 @@ import (
 	"github.com/wqvoon/cbox/pkg/utils"
 )
 
-// func MountFSByRawCopy(manifest image.Manifest, containerID string) {
-// 	containerMntPath := rootdir.GetContainerMountPath(containerID)
-
-// 	for _, layerPath := range manifest.GetLayerPaths() {
-// 		utils.CopyDir(layerPath, containerMntPath)
-// 	}
-// }
-
 type Container struct {
 	rootPath string
 
