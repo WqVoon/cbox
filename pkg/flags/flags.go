@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 /*
@@ -18,6 +19,10 @@ var (
 	driverName  = flag.String("storage_driver", "", "use which storage driver (default raw_copy)")
 	debug       = flag.Bool("debug", false, "show call stack when run failed (default false)")
 	dnsFilePath = flag.String("dns_file_path", "", "dns configuration file path")
+	volume      = flag.String("volume", "", "bind mount some volumes")
+
+	// 列表中的每一项是一个长度为 2 的列表，其中第一个字符串是 hostPath，第二个是 containerPath
+	parsedVolumes [][]string
 )
 
 func ParseAll() {
@@ -26,6 +31,7 @@ func ParseAll() {
 		prepareRootDirPath()
 		prepareDriverName()
 		prepareDNSFilePath()
+		prepareVolume()
 
 		parsed = true
 	}
@@ -48,6 +54,10 @@ func GetStorageDriver() string {
 
 func GetDNSFilePath() string {
 	return *dnsFilePath
+}
+
+func GetVolumes() [][]string {
+	return parsedVolumes
 }
 
 func prepareRootDirPath() {
@@ -108,5 +118,34 @@ func prepareDNSFilePath() {
 
 	if err != nil {
 		log.Fatalln("can not convert dnsFilePath to abs path")
+	}
+}
+
+func prepareVolume() {
+	if volume == nil || *volume == "" {
+		return
+	}
+
+	volumes := strings.Split(*volume, ",")
+	parsedVolumes = [][]string{}
+
+	for _, v := range volumes {
+		splitedV := strings.Split(v, ":")
+		if len(splitedV) != 2 {
+			log.Fatalln("error format of volume definition:", v)
+		}
+
+		hostPath, containerPath := splitedV[0], splitedV[1]
+
+		hostPath, err := filepath.Abs(hostPath)
+		if err != nil {
+			log.Fatal("failed to convert hostPath to abs path, err:", err)
+		}
+
+		if !filepath.IsAbs(containerPath) {
+			log.Fatal("containerPath must be abs path")
+		}
+
+		parsedVolumes = append(parsedVolumes, []string{hostPath, containerPath})
 	}
 }

@@ -114,6 +114,10 @@ func (c *Container) Stop() {
 		}
 	}
 
+	for _, v := range info.Volumes {
+		v.Unmount()
+	}
+
 	if err := info.GetProcess().Kill(); err != nil {
 		log.Errorln("failed to kill runtime process ,err:", err)
 	}

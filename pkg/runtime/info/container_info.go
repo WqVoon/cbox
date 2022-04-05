@@ -7,6 +7,7 @@ import (
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/storage/driver"
 	"github.com/wqvoon/cbox/pkg/utils"
+	"github.com/wqvoon/cbox/pkg/volume"
 )
 
 // 在容器停止时会将 containerInfo.Pid 设置为此值
@@ -35,6 +36,8 @@ type ContainerInfo struct {
 
 	// runtime 传递过来的宿主机 dns 文件路径
 	DNSFilePath string `json:"dns_file"`
+
+	Volumes []*volume.Volume `json:"volumes"`
 }
 
 // 判断 Container 是否在运行中
@@ -82,6 +85,11 @@ func (ci *ContainerInfo) SaveStorageDriver(driverName string) {
 
 func (ci *ContainerInfo) SaveDNSFilePath(filePath string) {
 	ci.DNSFilePath = filePath
+	ci.save()
+}
+
+func (ci *ContainerInfo) SaveVolumes(vs []*volume.Volume) {
+	ci.Volumes = vs
 	ci.save()
 }
 

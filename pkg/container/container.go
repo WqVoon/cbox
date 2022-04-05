@@ -9,6 +9,7 @@ import (
 	runtimeInfo "github.com/wqvoon/cbox/pkg/runtime/info"
 	"github.com/wqvoon/cbox/pkg/storage/driver"
 	"github.com/wqvoon/cbox/pkg/utils"
+	volumeUtils "github.com/wqvoon/cbox/pkg/volume/utils"
 )
 
 type Container struct {
@@ -42,6 +43,8 @@ func CreateContainer(img *image.Image, name string) *Container {
 
 	runtimeInfo.GetContainerInfo(containerID).SaveStorageDriver(driver.D.String())
 	runtimeInfo.GetImageInfo(img.Hash).MarkUsedBy(containerID)
+
+	volumeUtils.Record(containerID)
 
 	log.Printf("create container %s(%s)\n", name, containerID)
 

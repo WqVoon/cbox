@@ -49,6 +49,10 @@ func Handle() {
 		containerInfo.SaveDNSFilePath(dnsFilePath)
 	}
 
+	for _, v := range containerInfo.Volumes {
+		v.Mount()
+	}
+
 	unix.Chroot(rootdir.GetContainerMountPath(c.ID))
 
 	// TODO: Mount 的第一个参数如果留空则宿主机上会因为解析错误而读不到这条记录，也许可以利用下
