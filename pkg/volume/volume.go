@@ -1,6 +1,8 @@
 package volume
 
 import (
+	"os"
+
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/utils"
 	"golang.org/x/sys/unix"
@@ -13,7 +15,16 @@ type Volume struct {
 }
 
 func (v *Volume) Mount() {
-	utils.CreateDirIfNotExist(v.ContainerPath)
+	stat, err := os.Stat(v.HostPath)
+	if err != nil {
+		log.Errorf("failed to stat %q, err: %v\n", v.HostPath, err)
+	}
+
+	if stat.IsDir() {
+		utils.CreateDirIfNotExist(v.ContainerPath)
+	} else {
+		utils.WriteFileIfNotExist(v.ContainerPath, nil)
+	}
 
 	if err := unix.Mount(v.HostPath, v.ContainerPath, "bind", unix.MS_BIND, ""); err != nil {
 		log.Errorf("failed to bind mount %q to %q, err: %v\n",
