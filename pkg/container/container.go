@@ -34,17 +34,17 @@ func CreateContainer(img *image.Image, name string) *Container {
 		log.Errorln("container name has exists, try another plz")
 	}
 
-	idx.Add(name, &ContainerEntity{
-		ContainerID: containerID,
-		ImageHash:   img.Hash,
-	})
-
 	createContainerLayout(containerID)
 
 	runtimeInfo.GetContainerInfo(containerID).SaveStorageDriver(driver.D.String())
 	runtimeInfo.GetImageInfo(img.Hash).MarkUsedBy(containerID)
 
 	volumeUtils.Record(containerID)
+
+	idx.Add(name, &ContainerEntity{
+		ContainerID: containerID,
+		ImageHash:   img.Hash,
+	})
 
 	log.Printf("create container %s(%s)\n", name, containerID)
 
