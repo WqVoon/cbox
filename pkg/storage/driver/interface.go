@@ -24,6 +24,12 @@ var (
 	D Interface
 )
 
+func Init() {
+	driverName := flags.GetStorageDriver()
+
+	D = GetDriverByName(driverName)
+}
+
 // Register 会被具体的 StorageDriver 实现在启动时调用
 // 在向全局注册的同时验证对应的实现是否满足接口的需求，类似于 `var _ Interface = Obj{}` 的编译验证方式
 func Register(driver Interface) Interface {
@@ -34,14 +40,6 @@ func Register(driver Interface) Interface {
 	registeredDrivers[driver.String()] = driver
 
 	return driver
-}
-
-func init() {
-	flags.ParseAll()
-
-	driverName := flags.GetStorageDriver()
-
-	D = GetDriverByName(driverName)
 }
 
 func GetDriverByName(driverName string) Interface {

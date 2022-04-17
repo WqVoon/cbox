@@ -6,9 +6,7 @@ import (
 	"github.com/wqvoon/cbox/pkg/flags"
 )
 
-func init() {
-	flags.ParseAll()
-
+func Init() {
 	if flags.IsDebugMode() {
 		log.SetFlags(log.Llongfile)
 	} else {

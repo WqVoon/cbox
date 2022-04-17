@@ -25,7 +25,7 @@ var (
 	parsedVolumes [][]string
 )
 
-func ParseAll() {
+func Init() {
 	if !parsed {
 		flag.Parse()
 		prepareRootDirPath()
