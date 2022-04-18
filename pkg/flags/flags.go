@@ -6,7 +6,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 )
 
 /*
@@ -30,7 +29,6 @@ func Init() {
 		flag.Parse()
 		prepareRootDirPath()
 		prepareDNSFilePath()
-		prepareVolume()
 
 		parsed = true
 	}
@@ -57,6 +55,10 @@ func GetDNSFilePath() string {
 
 func GetVolumes() [][]string {
 	return parsedVolumes
+}
+
+func GetVolume() string {
+	return *volume
 }
 
 func prepareRootDirPath() {
@@ -99,34 +101,5 @@ func prepareDNSFilePath() {
 
 	if err != nil {
 		log.Fatalln("can not convert dnsFilePath to abs path")
-	}
-}
-
-func prepareVolume() {
-	if volume == nil || *volume == "" {
-		return
-	}
-
-	volumes := strings.Split(*volume, ",")
-	parsedVolumes = [][]string{}
-
-	for _, v := range volumes {
-		splitedV := strings.Split(v, ":")
-		if len(splitedV) != 2 {
-			log.Fatalln("error format of volume definition:", v)
-		}
-
-		hostPath, containerPath := splitedV[0], splitedV[1]
-
-		hostPath, err := filepath.Abs(hostPath)
-		if err != nil {
-			log.Fatal("failed to convert hostPath to abs path, err:", err)
-		}
-
-		if !filepath.IsAbs(containerPath) {
-			log.Fatal("containerPath must be abs path")
-		}
-
-		parsedVolumes = append(parsedVolumes, []string{hostPath, containerPath})
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/storage/driver"
+	"github.com/wqvoon/cbox/pkg/storage/volume"
 )
 
 func Init() {
@@ -16,4 +17,6 @@ func Init() {
 	log.Init()
 	// driver 通过 flags 参数决定使用哪个 storageDriver
 	driver.Init()
+	// volume 通过 flags 参数决定使用哪些 volume
+	volume.Init()
 }

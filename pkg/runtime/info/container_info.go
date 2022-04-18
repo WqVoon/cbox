@@ -2,6 +2,8 @@ package info
 
 import (
 	"os"
+	"path"
+	"strings"
 
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
@@ -19,6 +21,7 @@ func GetContainerInfo(containerID string) *ContainerInfo {
 
 	utils.GetObjFromJsonFile(infoPath, infoObj)
 	infoObj.filePath = infoPath
+	infoObj.containerID = containerID
 
 	return infoObj
 }
@@ -27,6 +30,8 @@ func GetContainerInfo(containerID string) *ContainerInfo {
 type ContainerInfo struct {
 	// info 文件相对于 rootdir 的路径
 	filePath string
+	// 该 Info 对象对应的 containerID
+	containerID string
 
 	// runtime 进程的 pid，被 runtime.Run 写入
 	Pid int `json:"pid"`
@@ -89,6 +94,15 @@ func (ci *ContainerInfo) SaveDNSFilePath(filePath string) {
 }
 
 func (ci *ContainerInfo) SaveVolumes(vs []*volume.Volume) {
+	mntPath := rootdir.GetContainerMountPath(ci.containerID)
+
+	// 保证容器路径指向的是宿主机视角下的绝对路径
+	for _, v := range vs {
+		if !strings.HasPrefix(v.ContainerPath, mntPath) {
+			v.ContainerPath = path.Join(mntPath, v.ContainerPath)
+		}
+	}
+
 	ci.Volumes = vs
 	ci.save()
 }

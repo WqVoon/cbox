@@ -8,7 +8,7 @@ import (
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	runtimeInfo "github.com/wqvoon/cbox/pkg/runtime/info"
 	"github.com/wqvoon/cbox/pkg/storage/driver"
-	volumeUtils "github.com/wqvoon/cbox/pkg/storage/volume/utils"
+	"github.com/wqvoon/cbox/pkg/storage/volume"
 	"github.com/wqvoon/cbox/pkg/utils"
 )
 
@@ -37,9 +37,8 @@ func CreateContainer(img *image.Image, name string) *Container {
 	createContainerLayout(containerID)
 
 	runtimeInfo.GetContainerInfo(containerID).SaveStorageDriver(driver.D.String())
+	runtimeInfo.GetContainerInfo(containerID).SaveVolumes(volume.GetVolumes())
 	runtimeInfo.GetImageInfo(img.Hash).MarkUsedBy(containerID)
-
-	volumeUtils.Record(containerID)
 
 	idx.Add(name, &ContainerEntity{
 		ContainerID: containerID,
