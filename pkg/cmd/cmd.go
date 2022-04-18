@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"flag"
 	"time"
 
 	"github.com/wqvoon/cbox/pkg/container"
@@ -31,7 +32,14 @@ func RegisterCmd(name, description string, fn func(args []string)) {
 	cmdSet.cmds = append(cmdSet.cmds, &Cmd{name, description})
 }
 
-func Run(cmdName string, args []string) {
+func Run() {
+	cmdName := "help"
+
+	args := flag.Args()
+	if len(args) > 0 {
+		cmdName, args = args[0], args[1:]
+	}
+
 	if fn, isIn := cmdSet.name2Fn[cmdName]; isIn {
 		fn(args)
 	} else {
@@ -75,6 +83,10 @@ func init() {
 		"run",
 		"create + start，默认运行 entrypoint，命令格式 `cbox run <IMAGE> <CONTAINER> [...args]`",
 		func(args []string) {
+			if len(args) < 2 {
+				log.Errorln("malformed command, run `cbox help` for more info")
+			}
+
 			imageNameTag, containerName := args[0], args[1]
 			c := container.CreateContainer(
 				image.GetImage(utils.GetNameTag(imageNameTag)), containerName,
@@ -88,6 +100,10 @@ func init() {
 		"create",
 		"创建容器，命令格式 `cbox create <IMAGE> <CONTAINER>`",
 		func(args []string) {
+			if len(args) != 2 {
+				log.Errorln("malformed command, run `cbox help` for more info")
+			}
+
 			imageNameTag, containerName := args[0], args[1]
 			container.CreateContainer(
 				image.GetImage(utils.GetNameTag(imageNameTag)), containerName,
@@ -105,6 +121,10 @@ func init() {
 		"exec",
 		"在容器环境下执行命令, 默认运行 entrypoint，命令格式 `cbox exec <CONTAINER> [...args]`",
 		func(args []string) {
+			if len(args) == 0 {
+				log.Errorln("malformed command, run `cbox help` for more info")
+			}
+
 			name := args[0]
 			c := container.GetContainerByName(name)
 			c.Exec(args[1:]...)
@@ -135,6 +155,10 @@ func init() {
 		"pull",
 		"拉取镜像到本地，命令格式 `cbox pull <CONTAINER>`",
 		func(args []string) {
+			if len(args) != 1 {
+				log.Errorln("malformed command, run `cbox help` for more info")
+			}
+
 			image.Pull(utils.GetNameTag(args[0]))
 		})
 

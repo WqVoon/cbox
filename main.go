@@ -1,8 +1,6 @@
 package main
 
 import (
-	"flag"
-
 	"github.com/wqvoon/cbox/pkg"
 	"github.com/wqvoon/cbox/pkg/cmd"
 	"github.com/wqvoon/cbox/pkg/runtime"
@@ -16,6 +14,5 @@ func main() {
 		runtime.Handle()
 	}
 
-	args := flag.Args()
-	cmd.Run(args[0], args[1:])
+	cmd.Run()
 }
