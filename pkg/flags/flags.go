@@ -29,7 +29,6 @@ func Init() {
 	if !parsed {
 		flag.Parse()
 		prepareRootDirPath()
-		prepareDriverName()
 		prepareDNSFilePath()
 		prepareVolume()
 
@@ -82,24 +81,6 @@ func prepareRootDirPath() {
 		log.Fatalln("failed to get absolute path from", *rootDirPath)
 	}
 	*rootDirPath = absPath
-}
-
-func prepareDriverName() {
-	const driverEnvName = "CBOX_STORAGE_DRIVER"
-	const defaultDriverName = "raw_copy"
-
-	// 命令行的 flag 优先
-	if driverName != nil && len(*driverName) != 0 {
-		return
-	}
-
-	// 否则先看环境变量，这里不用 LookupEnv 是为了避免拿到空值
-	*driverName = os.Getenv(driverEnvName)
-
-	// 如果环境变量还没有，就设成默认值
-	if driverName == nil || len(*driverName) == 0 {
-		*driverName = defaultDriverName
-	}
 }
 
 func prepareDNSFilePath() {
