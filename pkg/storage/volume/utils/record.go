@@ -6,7 +6,7 @@ import (
 	"github.com/wqvoon/cbox/pkg/flags"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	runtimeInfo "github.com/wqvoon/cbox/pkg/runtime/info"
-	"github.com/wqvoon/cbox/pkg/volume"
+	"github.com/wqvoon/cbox/pkg/storage/volume"
 )
 
 // 将 flags 中传递的 volumes 记录在 containerInfo 中
