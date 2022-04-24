@@ -3,6 +3,7 @@ package pkg
 import (
 	"github.com/wqvoon/cbox/pkg/flags"
 	"github.com/wqvoon/cbox/pkg/log"
+	"github.com/wqvoon/cbox/pkg/network/dns"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/storage/driver"
 	"github.com/wqvoon/cbox/pkg/storage/volume"
@@ -19,4 +20,6 @@ func Init() {
 	driver.Init()
 	// volume 通过 flags 参数决定使用哪些 volume
 	volume.Init()
+	// dns 使用了 log，所以需要放在 log.Init 后面
+	dns.Init()
 }

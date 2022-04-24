@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/wqvoon/cbox/pkg/container"
-	"github.com/wqvoon/cbox/pkg/flags"
 	"github.com/wqvoon/cbox/pkg/log"
+	"github.com/wqvoon/cbox/pkg/network/dns"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/runtime/info"
 	"github.com/wqvoon/cbox/pkg/utils"
@@ -43,11 +43,9 @@ func Handle() {
 	}
 
 	containerInfo := info.GetContainerInfo(c.ID)
-	dnsFilePath := flags.GetDNSFilePath()
-	if dnsFilePath != "" {
-		utils.CopyFile(dnsFilePath, rootdir.GetContainerDNSConfigPath(c.ID))
-		containerInfo.SaveDNSFilePath(dnsFilePath)
-	}
+	dnsFilePath := dns.GetDNSFilePath()
+	utils.CopyFile(dnsFilePath, rootdir.GetContainerDNSConfigPath(c.ID))
+	containerInfo.SaveDNSFilePath(dnsFilePath)
 
 	for _, v := range containerInfo.Volumes {
 		v.Mount()

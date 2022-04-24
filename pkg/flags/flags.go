@@ -28,8 +28,6 @@ func Init() {
 	if !parsed {
 		flag.Parse()
 		prepareRootDirPath()
-		prepareDNSFilePath()
-
 		parsed = true
 	}
 }
@@ -83,23 +81,4 @@ func prepareRootDirPath() {
 		log.Fatalln("failed to get absolute path from", *rootDirPath)
 	}
 	*rootDirPath = absPath
-}
-
-func prepareDNSFilePath() {
-	var err error
-	const defaultPath = "/etc/resolv.conf"
-
-	// 说明没有设置过这个 flag，此时应该设置默认值或者退出，否则下面的 Abs 会出问题
-	if *dnsFilePath == "" {
-		if _, err := os.Stat(defaultPath); err == nil {
-			*dnsFilePath = defaultPath
-		}
-		return
-	}
-
-	*dnsFilePath, err = filepath.Abs(*dnsFilePath)
-
-	if err != nil {
-		log.Fatalln("can not convert dnsFilePath to abs path")
-	}
 }
