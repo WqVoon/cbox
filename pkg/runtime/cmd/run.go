@@ -16,7 +16,7 @@ import (
 // 创建一个 runtime 进程来设置容器的运行时状态
 func Run(containerID string) {
 	exePath := "/proc/self/exe"
-	rootdirFlag := fmt.Sprintf("--root_dir=%s", rootdir.GetRootPath())
+	rootdirFlag := fmt.Sprintf("--root_dir=%s", rootdir.GetRootDirPath())
 	dnsFilePath := fmt.Sprintf("--dns_file_path=%s", flags.GetDNSFilePath())
 
 	cmd := &exec.Cmd{

@@ -2,42 +2,15 @@ package rootdir
 
 import (
 	"path"
-	"path/filepath"
-
-	"github.com/wqvoon/cbox/pkg/flags"
-	"github.com/wqvoon/cbox/pkg/log"
-	"github.com/wqvoon/cbox/pkg/utils"
 )
 
-func Init() {
-	rootPath := flags.GetRootDirPath()
-	if !filepath.IsAbs(rootPath) {
-		log.Errorln("root_dir must be a absolute path")
-	}
-
-	subPaths := []string{
-		path.Join("containers", "idx.json"),
-		path.Join("images", "idx.json"),
-	}
-
-	data := []byte("{}")
-
-	for _, subPath := range subPaths {
-		path := path.Join(rootPath, subPath)
-
-		utils.WriteFileIfNotExist(path, data)
-	}
-
-	utils.CreateDirIfNotExist(path.Join(rootPath, "tarballs"))
-}
-
-var GetRootPath = flags.GetRootDirPath
+func GetRootDirPath() string { return rootDirPath }
 
 //--------------- Image Start ---------------
 
 // cbox-dir 中存放所有 images 的位置
 // 内部有一个 idx.json 文件作为索引，以及以 imageHash 命名的文件夹，各文件夹内部是对应镜像的 Layout
-func GetImageRootPath() string { return path.Join(GetRootPath(), "images") }
+func GetImageRootPath() string { return path.Join(GetRootDirPath(), "images") }
 
 //---------- Image Root Start ----------
 
@@ -86,7 +59,7 @@ func GetImageConfigPath(imageHash, configFileName string) string {
 
 // cbox-dir 中存放所有 containers 的位置
 // 内部有一个 idx.json 文件作为索引，以及以 containerID 命名的文件夹，各文件夹内部是对应容器的 Layout
-func GetContainerRootPath() string { return path.Join(GetRootPath(), "containers") }
+func GetContainerRootPath() string { return path.Join(GetRootDirPath(), "containers") }
 
 //---------- Container Root Start ----------
 
@@ -137,7 +110,7 @@ func GetContainerDNSConfigPath(containerID string) string {
 
 // 获取 cbox-dir 中 tarballs 文件夹的路径
 func GetTarballRootPath() string {
-	return path.Join(GetRootPath(), "tarballs")
+	return path.Join(GetRootDirPath(), "tarballs")
 }
 
 // 获取 tarballs 文件夹中某个 Image 的路径
