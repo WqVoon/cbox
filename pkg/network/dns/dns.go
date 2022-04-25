@@ -3,6 +3,7 @@ package dns
 import (
 	"path/filepath"
 
+	"github.com/wqvoon/cbox/pkg/config"
 	"github.com/wqvoon/cbox/pkg/flags"
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/utils"
@@ -14,6 +15,7 @@ var dnsFilePath string
 func Init() {
 	candidateList := []string{
 		flags.GetDNSFilePath(),
+		config.GetDNSFilePath(),
 		"/etc/resolv.conf",
 		"/var/run/systemd/resolve/resolv.conf",
 	}

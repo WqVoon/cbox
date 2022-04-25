@@ -3,13 +3,14 @@ package driver
 import (
 	"os"
 
+	"github.com/wqvoon/cbox/pkg/config"
 	"github.com/wqvoon/cbox/pkg/flags"
 	"github.com/wqvoon/cbox/pkg/log"
 )
 
 func Init() {
 	const driverEnvName = "CBOX_STORAGE_DRIVER"
-	const defaultDriverName = "raw_copy"
+	defaultDriverName := config.GetDriverName()
 
 	// 命令行的 flag 优先
 	driverName := flags.GetStorageDriver()

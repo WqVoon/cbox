@@ -117,3 +117,5 @@ func GetTarballRootPath() string {
 func GetImageTarballPath(imgHash string) string {
 	return path.Join(GetTarballRootPath(), imgHash, "image.tar")
 }
+
+func GetConfigPath() string { return path.Join(GetRootDirPath(), "config.json") }

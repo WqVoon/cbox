@@ -54,6 +54,7 @@ func initRootDirLayout() {
 	subPaths := []string{
 		path.Join("containers", "idx.json"),
 		path.Join("images", "idx.json"),
+		"config.json",
 	}
 
 	data := []byte("{}")
