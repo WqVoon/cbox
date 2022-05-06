@@ -88,8 +88,6 @@ func CopyDirContent(from, to string) {
 		log.Errorln("faild to stat", from, "err:", err)
 	}
 
-	CreateDirIfNotExist(to)
-
 	cmd := exec.Command("cp", "-r", from, to)
 
 	if output, err := cmd.CombinedOutput(); err != nil {

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"flag"
+	"strings"
 	"time"
 
 	"github.com/wqvoon/cbox/pkg/container"
@@ -174,5 +175,34 @@ func init() {
 		"删除本地的镜像，命令格式 `cbox rmi <IMAGE> [...<IMAGE>]`",
 		func(args []string) {
 			image.DeleteImagesNyName(args...)
+		})
+
+	RegisterCmd(
+		"cp",
+		"在宿主机和容器间传递文件或文件夹，命令格式 `cbox cp <CONTAINER>:src-abs-path host-dst-path`",
+		func(args []string) {
+			if len(args) != 2 {
+				log.Errorln("malformed command, run `cbox help` for more info")
+			}
+
+			src, dst := args[0], args[1]
+
+			splitedSrc := strings.Split(src, ":")
+			splitedDst := strings.Split(dst, ":")
+
+			srcIsContainerPath := len(splitedSrc) == 2
+			dstIsContainerPath := len(splitedDst) == 2
+
+			if (srcIsContainerPath && dstIsContainerPath) || (!srcIsContainerPath && !dstIsContainerPath) {
+				log.Errorln("one of src and dst must be the host directory")
+			}
+
+			if dstIsContainerPath {
+				containerName, filePath := splitedDst[0], splitedDst[1]
+				container.GetContainerByName(containerName).CopyFromHost(src, filePath)
+			} else {
+				containerName, filePath := splitedSrc[0], splitedSrc[1]
+				container.GetContainerByName(containerName).CopyToHost(filePath, dst)
+			}
 		})
 }

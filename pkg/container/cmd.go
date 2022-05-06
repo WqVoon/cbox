@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -146,4 +147,48 @@ func (c *Container) Delete() {
 	// TODO: 后面要处理更多的运行时副作用
 
 	log.Printf("container %s deleted\n", c.Name)
+}
+
+// 从宿主机复制文件/文件夹到容器内，from 是宿主机路径，to 是容器路径
+// from 可以是相对路径，to 需要是绝对路径
+func (c *Container) CopyFromHost(from, to string) {
+	if !runtimeInfo.GetContainerInfo(c.ID).IsRunning() {
+		log.Errorln("can not copy file to a not running container")
+	}
+
+	if !utils.PathIsExist(from) {
+		log.Errorln("path", from, "is not exists")
+	}
+
+	if !filepath.IsAbs(to) {
+		log.Errorln("path", to, "is not abs path")
+	}
+
+	fullDstPath := rootdir.GetContainerMountPath(c.ID) + to
+
+	utils.CopyDirContent(from, fullDstPath)
+
+	log.Println("copy done")
+}
+
+// 从容器复制文件/文件夹到宿主机，from 是容器路径，to 是宿主机路径
+// from 需要是绝对路径，to 可以是相对路径
+func (c *Container) CopyToHost(from, to string) {
+	if !runtimeInfo.GetContainerInfo(c.ID).IsRunning() {
+		log.Errorln("can not copy file to a not running container")
+	}
+
+	if !filepath.IsAbs(from) {
+		log.Errorln("path", from, "is not abs path")
+	}
+
+	fullSrcPath := rootdir.GetContainerMountPath(c.ID) + from
+
+	if !utils.PathIsExist(fullSrcPath) {
+		log.Errorf("path `%s` is not exists for container `%s`\n", from, c.Name)
+	}
+
+	utils.CopyDirContent(fullSrcPath, to)
+
+	log.Println("copy done")
 }
