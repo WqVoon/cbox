@@ -3,6 +3,7 @@ package runtime
 import (
 	"flag"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/wqvoon/cbox/pkg/container"
@@ -43,9 +44,16 @@ func Handle() {
 	}
 
 	containerInfo := info.GetContainerInfo(c.ID)
-	dnsFilePath := dns.GetDNSFilePath()
-	utils.CopyFile(dnsFilePath, rootdir.GetContainerDNSConfigPath(c.ID))
-	containerInfo.SaveDNSFilePath(dnsFilePath)
+
+	{ // 配置容器 dns，如果 /etc 目录存在但 /etc/resolv.conf 文件不存在，那么创建该文件
+		hostDnsFilePath := dns.GetDNSFilePath()
+		containerDnsFilePath := rootdir.GetContainerDNSConfigPath(c.ID)
+		containerEtcPath := filepath.Dir(containerDnsFilePath)
+		if !utils.PathIsExist(containerDnsFilePath) && utils.PathIsExist(containerEtcPath) {
+			utils.CopyFile(hostDnsFilePath, containerDnsFilePath)
+			containerInfo.SaveDNSFilePath(hostDnsFilePath)
+		}
+	}
 
 	for _, v := range containerInfo.Volumes {
 		v.Mount()
