@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/wqvoon/cbox/pkg/builder"
 	"github.com/wqvoon/cbox/pkg/container"
 	"github.com/wqvoon/cbox/pkg/image"
 	"github.com/wqvoon/cbox/pkg/log"
@@ -204,5 +205,17 @@ func init() {
 				containerName, filePath := splitedSrc[0], splitedSrc[1]
 				container.GetContainerByName(containerName).CopyToHost(filePath, dst)
 			}
+		})
+
+	RegisterCmd(
+		"build",
+		"构建镜像，命令格式 `cbox build <JSON FILE NAME>`",
+		func(args []string) {
+			if len(args) != 1 {
+				log.Errorln("malformed command, run `cbox help` for more info")
+			}
+
+			filePath := args[0]
+			builder.LoadFromJsonFile(filePath).Build()
 		})
 }

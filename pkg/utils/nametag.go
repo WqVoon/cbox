@@ -12,6 +12,10 @@ type NameTag struct {
 }
 
 func GetNameTag(nt string) *NameTag {
+	if len(strings.Trim(nt, " ")) == 0 {
+		log.Errorln("error format of name tag, should be `name:tag`")
+	}
+
 	splitedNt := strings.Split(nt, ":")
 	if len(splitedNt) > 2 {
 		log.Errorln("error format of name tag, should be `name:tag`")

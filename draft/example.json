@@ -1,0 +1,19 @@
+{
+	"from": "alpine",
+	"env": {
+		"KEY": "VAL"
+	},
+	"copy": [
+		{
+			"src": ".",
+			"dst": "/cbox-src"
+		}
+	],
+	"cmds": [
+		["touch", "file-from-touch"],
+		["echo", "file content", ">", "file-from-touch"],
+		["apk", "add", "lsblk"]
+	],
+	"entrypoint": ["sh"],
+	"name": "my-image"
+}
