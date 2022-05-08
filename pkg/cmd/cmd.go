@@ -7,6 +7,7 @@ import (
 
 	"github.com/wqvoon/cbox/pkg/builder"
 	"github.com/wqvoon/cbox/pkg/container"
+	"github.com/wqvoon/cbox/pkg/flags"
 	"github.com/wqvoon/cbox/pkg/image"
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/utils"
@@ -216,6 +217,11 @@ func init() {
 			}
 
 			filePath := args[0]
-			builder.LoadFromJsonFile(filePath).Build()
+
+			if flags.UseDockerfile() {
+				builder.ParseDockerfile(filePath).Build()
+			} else {
+				builder.LoadFromJsonFile(filePath).Build()
+			}
 		})
 }
