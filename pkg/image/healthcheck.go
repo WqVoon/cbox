@@ -52,7 +52,10 @@ func (task *HealthCheckTaskType) Start(onFailed func(error, []byte)) {
 		task.Retries = defaultRetries
 	}
 
-	log.Println("health check cmd:", task.Cmd)
+	log.Println("- health check interval:", task.Interval)
+	log.Println("- health check timeout:", task.Timeout)
+	log.Println("- health check retries:", task.Retries)
+	log.Println("- health check cmd:", task.Cmd)
 	emptyReader := bytes.NewReader(nil)
 
 	for range time.NewTicker(task.Interval).C {
