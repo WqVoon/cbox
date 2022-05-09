@@ -5,6 +5,7 @@ import (
 	"context"
 	"log"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -27,7 +28,7 @@ type HealthCheckTaskType struct {
 	Retries int `json:"retries"`
 
 	// 检查时执行的具体内容，如果执行发生错误那么认为这次 Retry 失败
-	Cmd string `json:"cmd"`
+	Cmd []string `json:"cmd"`
 }
 
 // 检查任务是否有效，仅在有效时才应该进行 Start
@@ -52,11 +53,12 @@ func (task *HealthCheckTaskType) Start(onFailed func(error, []byte)) {
 		task.Retries = defaultRetries
 	}
 
+	emptyReader := bytes.NewReader(nil)
+	cmdStr := strings.Join(task.Cmd, " ")
 	log.Println("- health check interval:", task.Interval)
 	log.Println("- health check timeout:", task.Timeout)
 	log.Println("- health check retries:", task.Retries)
-	log.Println("- health check cmd:", task.Cmd)
-	emptyReader := bytes.NewReader(nil)
+	log.Println("- health check cmd:", cmdStr)
 
 	for range time.NewTicker(task.Interval).C {
 		var content []byte
@@ -64,7 +66,7 @@ func (task *HealthCheckTaskType) Start(onFailed func(error, []byte)) {
 
 		for i := 0; i < task.Retries; i++ {
 			ctx, cancelFunc := context.WithTimeout(context.TODO(), task.Timeout)
-			cmd := exec.CommandContext(ctx, "sh", "-c", task.Cmd)
+			cmd := exec.CommandContext(ctx, "sh", "-c", cmdStr)
 			cmd.Stdin = emptyReader // 避免使用 os.DevNull，因为目前还没挂载 dev :-P
 			content, err = cmd.CombinedOutput()
 			cancelFunc()
