@@ -94,7 +94,7 @@ func getContainerHelper(img *image.Image, containerID, containerName string) *Co
 // TODO：后面可以加一些 filter，并且以表格的形式输出
 func ListAllContainer() {
 	tw := utils.NewTableWriter([]string{
-		"container name", "container id", "image", "command", "running", "driver",
+		"container name", "container id", "image", "command", "running", "driver", "healthy",
 	}, 16)
 
 	tw.PrintlnHeader()
@@ -110,7 +110,13 @@ func ListAllContainer() {
 		status := fmt.Sprint(info.IsRunning())
 		driver := info.StorageDriver
 
-		tw.PrintlnData(containerName, containerID, imageName, command, status, driver)
+		healthy := "-"
+		hasTask := c.Image.HealthCheckTask != nil
+		if hasTask {
+			healthy = fmt.Sprint(info.IsHealthy())
+		}
+
+		tw.PrintlnData(containerName, containerID, imageName, command, status, driver, healthy)
 		return true
 	})
 }

@@ -45,6 +45,20 @@ type ContainerInfo struct {
 	Volumes []*volume.Volume `json:"volumes"`
 }
 
+// 根据 health check 文件判断容器是否正常，由于里面记录的是实时错误原因，所以只需要检测文件长度即可
+func (ci *ContainerInfo) IsHealthy() bool {
+	filePath := rootdir.GetContainerHealthCheckInfoPath(ci.containerID, false)
+
+	info, err := os.Stat(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return true
+		}
+		log.Errorln("failed to stat health check info, err:", err)
+	}
+	return info.Size() == 0
+}
+
 // 判断 Container 是否在运行中
 func (ci *ContainerInfo) IsRunning() bool {
 	return ci.Pid != STOPPED_PID
