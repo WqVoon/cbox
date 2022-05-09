@@ -17,3 +17,12 @@ func NewStringSlice(strs ...string) []string {
 
 	return newSlice
 }
+
+func FindIdxInStringSlice(source []string, target string) int {
+	for idx, s := range source {
+		if s == target {
+			return idx
+		}
+	}
+	return -1
+}

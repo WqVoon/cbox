@@ -11,9 +11,14 @@
 	],
 	"cmds": [
 		["touch", "file-from-touch"],
-		["echo", "file content", ">", "file-from-touch"],
-		["apk", "add", "lsblk"]
+		["echo", "file content", ">", "file-from-touch"]
 	],
 	"entrypoint": ["sh"],
-	"name": "my-image"
+	"name": "my-image",
+	"health_check": {
+		"interval": 5,
+		"timeout": 10,
+		"retries": 3,
+		"cmd": ["echo", "healthy", ">>", "health-check"]
+	}
 }

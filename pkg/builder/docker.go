@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/wqvoon/cbox/pkg/log"
+	"github.com/wqvoon/cbox/pkg/utils"
 )
 
 // 用来按空白符号切分一行，忽略引号内的空白符
@@ -116,6 +117,24 @@ func handleOneline(bt *BuildTask, lineNum int, tokens []string) {
 		}
 
 		bt.ImageNameStr = args[0]
+
+	case "HEALTHCHECK":
+		if bt.HealthCheckTask != nil {
+			log.Errorf("line %d error: duplicated health check", lineNum)
+		}
+
+		optionsBorder := utils.FindIdxInStringSlice(args, "CMD")
+		if optionsBorder == -1 {
+			log.Errorf("line %d error: format error, should be `HEALTHCHECK [options] CMD <cmd> [...<cmd>]`\n", lineNum)
+		}
+
+		options, args := args[:optionsBorder], args[optionsBorder+1:]
+		task, err := buildHealthCheck(options, args)
+		if err != nil {
+			log.Errorf("line %d error: %v\n", lineNum, err)
+		}
+
+		bt.HealthCheckTask = task
 
 	default:
 		log.Errorf("line %d error: unsupported cmd\n", lineNum)

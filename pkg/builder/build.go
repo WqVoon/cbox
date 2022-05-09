@@ -63,6 +63,11 @@ func (bt *BuildTask) preflight() {
 	if len(bt.Entrypint) == 0 {
 		log.Errorln("entrypoint must be defined")
 	}
+
+	log.Println("check health-check-task")
+	if bt.HealthCheckTask != nil && !bt.HealthCheckTask.IsValid() {
+		log.Errorln("invalid health-check-task")
+	}
 }
 
 // 准备基础镜像，如果不存在则进行拉取
@@ -106,8 +111,9 @@ func (bt *BuildTask) generateLayout() {
 	log.Println("generate config file")
 	config := &image.ImageConfig{
 		Config: image.ImageConfigDetail{
-			Env: bt.parseEnv(),
-			Cmd: bt.Entrypint,
+			Env:             bt.parseEnv(),
+			Cmd:             bt.Entrypint,
+			HealthCheckTask: bt.HealthCheckTask,
 		},
 	}
 	utils.SaveObjToJsonFile(rootdir.GetImageConfigPath(bt.ImageHash, imageConfigFilename), config)

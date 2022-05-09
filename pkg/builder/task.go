@@ -30,6 +30,9 @@ type BuildTask struct {
 	// 需要被执行的 Cmd，其执行在所有的 Copy 结束后
 	Cmds []Cmd `json:"cmds"`
 
+	// 健康检查任务
+	HealthCheckTask *image.HealthCheckTaskType `json:"health_check"`
+
 	// 入口命令
 	Entrypint Cmd `json:"entrypoint"`
 }

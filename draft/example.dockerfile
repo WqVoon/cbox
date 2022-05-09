@@ -20,6 +20,11 @@ RUN echo "file content 2" >> file-from-touch
 # 第一个参数是宿主机目录，第二个参数是容器目录
 COPY . /cbox-src
 
+# 支持三个 option，默认值同 docker
+# CMD 后面的语法与 RUN 命令相同
+HEALTHCHECK --interval=5 --timeout=10 --retries=3 CMD \
+echo healthy >> health-check
+
 # ENTRYPOINT 不支持使用 && 来连接多个命令
 ENTRYPOINT cat file-from-touch
 
