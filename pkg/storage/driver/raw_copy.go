@@ -36,7 +36,7 @@ func (rc *RawCopy) Mount(dst string, layerPaths ...string) {
 			switch {
 			case d.IsDir():
 				if err := os.MkdirAll(dstPath, 0777); err != nil {
-					panic(err)
+					log.Errorln("failed to makedir, err:", err)
 				}
 
 			case d.Type().IsRegular():

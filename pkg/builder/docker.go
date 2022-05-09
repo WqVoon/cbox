@@ -19,7 +19,7 @@ func ParseDockerfile(filename string) *BuildTask {
 
 	file, err := os.Open(filename)
 	if err != nil {
-		panic(err)
+		log.Errorln("failed to open docker file, err:", err)
 	}
 	defer file.Close()
 
