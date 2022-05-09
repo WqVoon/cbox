@@ -100,6 +100,16 @@ func GetContainerDNSConfigPath(containerID string) string {
 	return path.Join(GetContainerMountPath(containerID), "etc", "resolv.conf")
 }
 
+// 获取健康检查文件的路径，这个文件中记录了实时的不健康原因，根据 inContainerView 来区分是宿主机视角还是容器视角
+func GetContainerHealthCheckInfoPath(containerID string, inContainerView bool) string {
+	fileName := "/.cbox-health-check"
+	if inContainerView {
+		return fileName
+	}
+
+	return path.Join(GetContainerMountPath(containerID), fileName)
+}
+
 // Container FS End
 
 //----- Container Layout End -----

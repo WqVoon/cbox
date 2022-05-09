@@ -59,7 +59,13 @@ func Handle() {
 		v.Mount()
 	}
 
-	unix.Chroot(rootdir.GetContainerMountPath(c.ID))
+	if err := unix.Chroot(rootdir.GetContainerMountPath(c.ID)); err != nil {
+		log.Errorln("failed to chroot, err:", err)
+	}
+
+	if err := unix.Chdir("/"); err != nil {
+		log.Errorln("failed to chdir, err:", err)
+	}
 
 	// TODO: Mount 的第一个参数如果留空则宿主机上会因为解析错误而读不到这条记录，也许可以利用下
 	utils.CreateDirIfNotExist("/proc")
@@ -67,8 +73,39 @@ func Handle() {
 		log.Errorln("faild to mount /proc, err:", err)
 	}
 
-	// TODO: 暂时使用 for + pause 的方式来减少资源消耗，后面尝试其他方法
-	for {
-		unix.Pause()
+	enterLoop(c)
+}
+
+// 让 runtime 进入循环，从而保持后台运行的状态，根据是否有 healthCheckTask，会进入健康检查循环或 pause
+func enterLoop(c *container.Container) {
+	healthCheckTask := c.Image.HealthCheckTask
+	if healthCheckTask != nil && healthCheckTask.IsValid() {
+		log.Println("runtime start to check health")
+		healthCheckTask.Start(func(e error, info []byte) {
+			var err error
+			defer func() {
+				if err != nil {
+					c.Stop()
+					log.Errorln("failed to write unhealthy reason, err:", err)
+				}
+			}()
+
+			filePath := rootdir.GetContainerHealthCheckInfoPath(c.ID, true)
+			file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+			if err != nil {
+				return
+			}
+			defer file.Close()
+
+			_, err = file.Write(info)
+			if err != nil {
+				return
+			}
+		})
+	} else {
+		log.Println("no invalid health check task, so runtime just pause")
+		for {
+			unix.Pause()
+		}
 	}
 }

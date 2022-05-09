@@ -20,6 +20,8 @@ type Image struct {
 	Manifest *ManifestType
 	// Layer fs 对应的文件夹相对于 rootdir 的路径
 	Layers []string
+	// 健康检查任务
+	HealthCheckTask *HealthCheckTaskType
 }
 
 // TODO: 后面可以做成优先搜索 nameTag，找不到再搜 hash，再找不到后退出
@@ -53,14 +55,16 @@ Image(%s):
 // 之所以抽离出这个方法，是因为后面可能会以 functional options 模式传参
 func getImageHelper(nameTag *utils.NameTag, hash string) *Image {
 	manifest := GetManifestByHash(hash)
+	config := manifest.GetConfigByHash(hash)
 
 	return &Image{
 		rootPath: rootdir.GetImageLayoutPath(hash),
 
-		Hash:     hash,
-		NameTag:  nameTag,
-		Manifest: manifest,
-		Config:   manifest.GetConfigByHash(hash),
-		Layers:   manifest.GetLayerFSPaths(),
+		Hash:            hash,
+		NameTag:         nameTag,
+		Manifest:        manifest,
+		Config:          config,
+		Layers:          manifest.GetLayerFSPaths(),
+		HealthCheckTask: config.Config.HealthCheckTask,
 	}
 }

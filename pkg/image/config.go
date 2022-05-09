@@ -6,8 +6,9 @@ import (
 )
 
 type ImageConfigDetail struct {
-	Env []string `json:"Env"`
-	Cmd []string `json:"Cmd"`
+	Env             []string             `json:"Env"`
+	Cmd             []string             `json:"Cmd"`
+	HealthCheckTask *HealthCheckTaskType `json:"HealthCheckTask"`
 }
 type ImageConfig struct {
 	filePath string
