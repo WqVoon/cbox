@@ -103,7 +103,7 @@ func enterLoop(c *container.Container) {
 			}
 		})
 	} else {
-		log.Println("no invalid health check task, so runtime just pause")
+		log.Println("no valid health check task, so runtime just pause")
 		for {
 			unix.Pause()
 		}
