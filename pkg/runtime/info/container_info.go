@@ -61,7 +61,11 @@ func (ci *ContainerInfo) IsHealthy() bool {
 
 // 判断 Container 是否在运行中
 func (ci *ContainerInfo) IsRunning() bool {
-	return ci.Pid != STOPPED_PID
+	if ci.Pid == STOPPED_PID {
+		return false
+	}
+
+	return utils.ProcessIsRunning(ci.Pid)
 }
 
 // 获取 pid 对应的 Process 对象
