@@ -66,7 +66,7 @@ func GetContainerRootPath() string { return path.Join(GetRootDirPath(), "contain
 // container 的 idx.json 文件
 func GetContainerIdxPath() string { return path.Join(GetContainerRootPath(), "idx.json") }
 
-// container 的 Layout，内部有 fs、ns 文件夹
+// container 的 Layout，内部有 fs 文件夹和 info 文件
 func GetContainerLayoutPath(containerID string) string {
 	return path.Join(GetContainerRootPath(), containerID)
 }
@@ -76,11 +76,6 @@ func GetContainerLayoutPath(containerID string) string {
 // container 的 info 文件，内部保存运行时的相关信息
 func GetContainerInfoPath(containerID string) string {
 	return path.Join(GetContainerLayoutPath(containerID), "info")
-}
-
-// container 的 ns 文件夹，内部绑定挂载了容器对应的 ns
-func GetContainerNSPath(containerID string) string {
-	return path.Join(GetContainerLayoutPath(containerID), "ns")
 }
 
 // container 的 fs，内部最重要的是 mnt 文件夹，此外根据不同的 StorageDriver 可能会有其他文件夹

@@ -24,18 +24,6 @@ func Handle() {
 		log.Println("faild to set hostname, err:", err)
 	}
 
-	// TODO: 待补充其他的 ns
-	namespaces := []string{"/pid", "/uts", "/ipc"}
-	srcPathPrefix := "/proc/self/ns"
-	dstPathPrefix := rootdir.GetContainerNSPath(c.ID)
-	for _, ns := range namespaces {
-		src := srcPathPrefix + ns
-		dst := dstPathPrefix + ns
-		if err := unix.Mount(src, dst, "", unix.MS_BIND, ""); err != nil {
-			log.Errorf("failed to bind mount %q to %q, err: %v\n", src, dst, err)
-		}
-	}
-
 	os.Clearenv()
 	for _, oneEnv := range c.Env {
 		envPair := strings.Split(oneEnv, "=")

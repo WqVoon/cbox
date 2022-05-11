@@ -42,7 +42,8 @@ func (c *Container) Start() {
 }
 
 func (c *Container) Exec(input ...string) {
-	if !runtimeInfo.GetContainerInfo(c.ID).IsRunning() {
+	containerInfo := runtimeInfo.GetContainerInfo(c.ID)
+	if !containerInfo.IsRunning() {
 		log.Errorln("can not exec a not-running container")
 		return
 	}
@@ -59,7 +60,7 @@ func (c *Container) Exec(input ...string) {
 		name, args = utils.ParseCmd(c.Entrypoint...)
 	}
 
-	enterNamespace(c.ID)
+	utils.EnterNamespaceByPid(containerInfo.Pid)
 
 	// 需要保证在 ExtractCmdFromOSArgs 前进行 Env 的处理，这样得到的 cmd 才是正确的
 	os.Clearenv()
@@ -104,15 +105,6 @@ func (c *Container) Stop() {
 	procPath := path.Join(mntPath, "proc")
 	if err := unix.Unmount(procPath, 0); err != nil {
 		log.Errorln("faild to unmount proc, err:", err)
-	}
-
-	namespaces := []string{"/pid", "/uts", "/ipc"}
-	nsPath := rootdir.GetContainerNSPath(c.ID)
-	for _, ns := range namespaces {
-		dstPath := path.Join(nsPath, ns)
-		if err := unix.Unmount(dstPath, 0); err != nil {
-			log.Errorf("failed to unmount %q, err: %v\n", dstPath, err)
-		}
 	}
 
 	for _, v := range info.Volumes {
