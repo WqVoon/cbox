@@ -149,7 +149,7 @@ func (bt *BuildTask) parseEnv() []string {
 
 	envMap := make(map[string]string, len(baseEnv))
 	for _, kv := range baseEnv {
-		splitedKV := strings.Split(kv, "=")
+		splitedKV := strings.SplitN(kv, "=", 2)
 		if len(splitedKV) != 2 {
 			log.Errorln("error format of env", kv)
 		}

@@ -65,7 +65,7 @@ func (c *Container) Exec(input ...string) {
 	// 需要保证在 ExtractCmdFromOSArgs 前进行 Env 的处理，这样得到的 cmd 才是正确的
 	os.Clearenv()
 	for _, oneEnv := range c.Env {
-		envPair := strings.Split(oneEnv, "=")
+		envPair := strings.SplitN(oneEnv, "=", 2)
 		key, val := envPair[0], envPair[1]
 		os.Setenv(key, val)
 	}

@@ -26,7 +26,7 @@ func Handle() {
 
 	os.Clearenv()
 	for _, oneEnv := range c.Env {
-		envPair := strings.Split(oneEnv, "=")
+		envPair := strings.SplitN(oneEnv, "=", 2)
 		key, val := envPair[0], envPair[1]
 		os.Setenv(key, val)
 	}
