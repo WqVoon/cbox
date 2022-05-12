@@ -234,4 +234,17 @@ func init() {
 				builder.LoadFromJsonFile(filePath).Build()
 			}
 		})
+
+	RegisterCmd(
+		"inspect",
+		"审查容器，命令格式 `cbox inspect <CONTAINER>`",
+		func(args []string) {
+			if len(args) != 1 {
+				log.Errorln("malformed command, run `cbox help` for more info")
+			}
+
+			name := args[0]
+
+			container.GetContainerByName(name).Inspect()
+		})
 }

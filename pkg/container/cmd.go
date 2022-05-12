@@ -184,3 +184,47 @@ func (c *Container) CopyToHost(from, to string) {
 
 	log.Println("copy done")
 }
+
+// 展示容器相关的详细信息
+func (c *Container) Inspect() {
+	info := runtimeInfo.GetContainerInfo(c.ID)
+
+	log.Println("inspection of container", c.Name)
+	{
+		log.Println("- id:", c.ID)
+		log.Println("- name:", c.Name)
+		log.Println("- image:", c.Image.NameTag)
+		log.Println("- is healthy:", info.IsHealthy())
+		log.Println("- is running:", info.IsRunning())
+
+		if info.IsRunning() {
+			log.Println("- runtime pid:", info.Pid)
+		}
+
+		log.Println("- storage driver:", info.StorageDriver)
+		log.Println("- dns file path:", info.DNSFilePath)
+		log.Println("- container layout path:", c.rootPath)
+		log.Println("- entrypoint:", c.Entrypoint)
+
+		if len(c.Env) > 0 {
+			log.Println("- env:")
+			for idx, kvPair := range c.Env {
+				splitedKvPair := strings.SplitN(kvPair, "=", 2)
+				log.Printf("  - env #%d:\n", idx)
+				log.Println("    - key:", splitedKvPair[0])
+				log.Println("    - val:", splitedKvPair[1])
+			}
+		}
+
+		if len(info.Volumes) > 0 {
+			log.Println("- volumes:")
+			containerPathPrefix := len(rootdir.GetContainerMountPath(c.ID))
+
+			for idx, v := range info.Volumes {
+				log.Printf("  - volume #%d:\n", idx)
+				log.Println("    - host path:", v.HostPath)
+				log.Println("    - container path:", v.ContainerPath[containerPathPrefix:])
+			}
+		}
+	}
+}
