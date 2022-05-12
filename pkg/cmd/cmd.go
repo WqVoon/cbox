@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"flag"
+	"fmt"
 	"strings"
 	"time"
 
@@ -19,8 +20,9 @@ type Cmd struct {
 }
 
 type CmdSet struct {
-	name2Fn map[string]func(args []string)
-	cmds    []*Cmd
+	name2Fn      map[string]func(args []string)
+	cmds         []*Cmd
+	maxCmdLength int // 记录最大命令名的长度，方便输出时的排版
 }
 
 // 保存所有被注册的命令
@@ -33,6 +35,11 @@ func RegisterCmd(name, description string, fn func(args []string)) {
 
 	cmdSet.name2Fn[name] = fn
 	cmdSet.cmds = append(cmdSet.cmds, &Cmd{name, description})
+
+	cmdLength := len(name)
+	if cmdLength > cmdSet.maxCmdLength {
+		cmdSet.maxCmdLength = cmdLength
+	}
 }
 
 func Run() {
@@ -55,8 +62,11 @@ func init() {
 		"help",
 		"显示帮助信息",
 		func([]string) {
+			// 命令名这一列的宽度是最长命令名的长度，否则如果直接用 '\t' 的话会有错位的问题
+			formatStr := fmt.Sprintf("%%-%ds  %%s\n", cmdSet.maxCmdLength)
+
 			for _, cmd := range cmdSet.cmds {
-				log.Println(cmd.name, "\t", cmd.description)
+				log.Printf(formatStr, cmd.name, cmd.description)
 			}
 		})
 
