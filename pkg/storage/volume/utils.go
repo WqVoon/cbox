@@ -29,11 +29,11 @@ func Init() {
 
 		hostPath, err := filepath.Abs(hostPath)
 		if err != nil {
-			log.Errorln("failed to convert hostPath to abs path, err:", err)
+			log.Errorf("failed to convert hostPath %q to abs path, err:%v\n", hostPath, err)
 		}
 
 		if !filepath.IsAbs(containerPath) {
-			log.Errorln("containerPath must be abs path")
+			log.Errorf("containerPath %q must be abs path\n", containerPath)
 		}
 
 		parsedVolumes = append(parsedVolumes, &Volume{
