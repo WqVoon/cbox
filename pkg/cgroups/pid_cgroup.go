@@ -27,7 +27,12 @@ type PIDCGroup struct {
 func (c *PIDCGroup) SetProcessLimit(pNum int) {
 	limitFilePath := path.Join(c.GetDirPath(), "pids.max")
 
-	err := ioutil.WriteFile(limitFilePath, []byte(strconv.Itoa(pNum)), 0644)
+	limitVal := "max"
+	if pNum >= 0 {
+		limitVal = strconv.Itoa(pNum)
+	}
+
+	err := ioutil.WriteFile(limitFilePath, []byte(limitVal), 0644)
 	if err != nil {
 		log.Errorln("failed to set process limit, err:", err)
 	}
