@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"github.com/wqvoon/cbox/pkg/cgroups"
 	"github.com/wqvoon/cbox/pkg/config"
 	"github.com/wqvoon/cbox/pkg/flags"
 	"github.com/wqvoon/cbox/pkg/log"
@@ -25,4 +26,6 @@ func Init() {
 	volume.Init()
 	// dns 使用了 log，所以需要放在 log.Init 后面
 	dns.Init()
+	// cgroups 使用了 config，所以需要放在 config.Init 后面
+	cgroups.Init()
 }
