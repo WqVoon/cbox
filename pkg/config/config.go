@@ -42,7 +42,14 @@ type cgroupConfig struct {
 }
 
 func Init() {
-	utils.GetObjFromJsonFile(rootdir.GetConfigPath(), &defaultConfig)
+	configPath := rootdir.GetConfigPath()
+
+	if utils.PathIsExist(configPath) {
+		utils.GetObjFromJsonFile(configPath, &defaultConfig)
+	} else {
+		// 如果配置文件不存在，那么将 defaultConfig 的内容写入
+		utils.PrettySaveObjToJsonFile(configPath, &defaultConfig)
+	}
 }
 
 func GetDriverName() string { return defaultConfig.DriverName }

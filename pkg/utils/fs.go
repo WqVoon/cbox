@@ -42,6 +42,17 @@ func SaveObjToJsonFile(filePath string, obj interface{}) {
 	}
 }
 
+func PrettySaveObjToJsonFile(filePath string, obj interface{}) {
+	data, err := json.MarshalIndent(obj, "", "  ")
+	if err != nil {
+		log.Errorln("faild to marshal obj to json, err:", err)
+	}
+
+	if err := ioutil.WriteFile(filePath, data, 0644); err != nil {
+		log.Errorln("faild to write json obj to file, err:", err)
+	}
+}
+
 func CreateDirIfNotExist(path string) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		if err = os.MkdirAll(path, 0755); err != nil {
