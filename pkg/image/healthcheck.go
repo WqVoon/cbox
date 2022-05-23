@@ -40,7 +40,7 @@ func (task *HealthCheckTaskType) IsValid() bool {
 }
 
 // 开始检查，如果 Interval 中的所有 Retry 均失败，那么使用最后一次 Retry 失败的原因调用 onFailed
-func (task *HealthCheckTaskType) Start(onFailed func(error, []byte)) {
+func (task *HealthCheckTaskType) Start(onSuccess func([]byte), onFailed func(error, []byte)) {
 	task.Interval = task.Interval * time.Second
 	if task.Interval == 0 {
 		task.Interval = defaultInterval
@@ -80,6 +80,10 @@ func (task *HealthCheckTaskType) Start(onFailed func(error, []byte)) {
 
 		if err != nil && onFailed != nil {
 			onFailed(err, content)
+		}
+
+		if err == nil && onSuccess != nil {
+			onSuccess(content)
 		}
 	}
 }

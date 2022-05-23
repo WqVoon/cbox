@@ -72,9 +72,17 @@ func Handle() {
 // 让 runtime 进入循环，从而保持后台运行的状态，根据是否有 healthCheckTask，会进入健康检查循环或 pause
 func enterLoop(c *container.Container) {
 	healthCheckTask := c.Image.HealthCheckTask
+	filePath := rootdir.GetContainerHealthCheckInfoPath(c.ID, true)
+
 	if healthCheckTask != nil && healthCheckTask.IsValid() {
 		log.Println("runtime start to check health")
-		healthCheckTask.Start(func(e error, info []byte) {
+		healthCheckTask.Start(func([]byte) {
+			// 成功时执行的回调
+			if utils.PathIsExist(filePath) {
+				os.Remove(filePath)
+			}
+		}, func(e error, info []byte) {
+			// 失败时执行的回调
 			var err error
 			defer func() {
 				if err != nil {
@@ -83,7 +91,6 @@ func enterLoop(c *container.Container) {
 				}
 			}()
 
-			filePath := rootdir.GetContainerHealthCheckInfoPath(c.ID, true)
 			file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 			if err != nil {
 				return
