@@ -18,23 +18,23 @@ func GetPIDCGroupByPath(pathname string) *PIDCGroup {
 	return cg
 }
 
-// 用来控制进程数量
+// 用来控制 Task 数量，Task 包括进程与线程
 type PIDCGroup struct {
 	BaseCGroup
 }
 
-// 限制当前 CGroup 中最多能够创建多少个进程
-func (c *PIDCGroup) SetProcessLimit(pNum int) {
+// 限制当前 CGroup 中最多能够创建多少个 Task
+func (c *PIDCGroup) SetTaskLimit(num int) {
 	limitFilePath := path.Join(c.GetDirPath(), "pids.max")
 
 	limitVal := "max"
-	if pNum >= 0 {
-		limitVal = strconv.Itoa(pNum)
+	if num >= 0 {
+		limitVal = strconv.Itoa(num)
 	}
 
 	err := ioutil.WriteFile(limitFilePath, []byte(limitVal), 0644)
 	if err != nil {
-		log.Errorln("failed to set process limit, err:", err)
+		log.Errorln("failed to set task limit, err:", err)
 	}
 }
 

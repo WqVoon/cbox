@@ -23,7 +23,7 @@ var defaultConfig = struct {
 		MemLimit:      4 * 1024, // 默认限额设置为 4GiB
 
 		PIDCgroupPath: "/sys/fs/cgroup/pids",
-		ProcessLimit:  -1, // 设置 -1 就是使用原本的值
+		TaskLimit:     -1, // 设置 -1 就是使用原本的值
 	},
 }
 
@@ -38,7 +38,7 @@ type cgroupConfig struct {
 	MemLimit      int    `json:"mem_limit"`       // 限制使用多少 MiB 的内存
 
 	PIDCgroupPath string `json:"pid_cgroup_path"` // pid cgroup 的绝对路径
-	ProcessLimit  int    `json:"process_limit"`   // 限制最多创建多少个进程
+	TaskLimit     int    `json:"task_limit"`      // 限制最多创建多少个 Task
 }
 
 func Init() {

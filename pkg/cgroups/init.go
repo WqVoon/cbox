@@ -29,6 +29,6 @@ func Init() {
 	Pid = GetPIDCGroupByPath(cc.PIDCgroupPath).GetOrCreateSubCGroup(cc.Name)
 	{
 		Pid.SetNotifyOnRelease(true)
-		Pid.SetProcessLimit(cc.ProcessLimit)
+		Pid.SetTaskLimit(cc.TaskLimit)
 	}
 }
