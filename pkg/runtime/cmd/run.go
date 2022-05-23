@@ -18,12 +18,20 @@ func Run(containerID string) {
 	exePath := "/proc/self/exe"
 	rootdirFlag := fmt.Sprintf("--root_dir=%s", rootdir.GetRootDirPath())
 	dnsFilePath := fmt.Sprintf("--dns_file_path=%s", flags.GetDNSFilePath())
+	cpuLimit := fmt.Sprintf("--cpu=%d", flags.GetCPULimit())
+	memLimit := fmt.Sprintf("--mem=%d", flags.GetMemLimit())
+	processLimit := fmt.Sprintf("--task=%d", flags.GetTaskLimit())
 
 	cmd := &exec.Cmd{
 		Path: exePath,
 
 		// 这里目前真正有效的只有 exePath 和 containerID，后面的内容只是帮助调试
-		Args: []string{exePath, rootdirFlag, dnsFilePath, containerID, "/* cbox's runtime */"},
+		Args: []string{
+			exePath,
+			rootdirFlag, dnsFilePath, cpuLimit, memLimit, processLimit, // flags
+			containerID,            // id
+			"/* cbox's runtime */", // comment
+		},
 
 		Stdin:  os.Stdin,
 		Stdout: os.Stdout,

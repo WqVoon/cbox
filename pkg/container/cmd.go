@@ -8,10 +8,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/wqvoon/cbox/pkg/cgroups"
+	"github.com/wqvoon/cbox/pkg/config"
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	runtimeCmd "github.com/wqvoon/cbox/pkg/runtime/cmd"
 	runtimeInfo "github.com/wqvoon/cbox/pkg/runtime/info"
+	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
 	"github.com/wqvoon/cbox/pkg/storage/driver"
 	"github.com/wqvoon/cbox/pkg/utils"
 	"golang.org/x/sys/unix"
@@ -70,6 +73,8 @@ func (c *Container) Exec(input ...string) {
 		os.Setenv(key, val)
 	}
 
+	runtimeUtils.JoinCurrentProcessToCGroup(os.Getpid(), c.ID)
+
 	// 这里需要保证在 ExtractCmdFromOSArgs 前进行 chroot，这样得到的 cmd 才是正确的
 	unix.Chroot(rootdir.GetContainerMountPath(c.ID))
 
@@ -119,6 +124,13 @@ func (c *Container) Stop() {
 	// UnMount 必须在 Kill 之后，否则会报 device busy（至少对于 Overlay2 来说）
 	// TODO: 这里简单等待100ms，后面整个更稳妥的办法确保进程退出后再执行 UnMount
 	time.Sleep(100 * time.Millisecond)
+
+	if config.GetCgroupConfig().Enable { // 删除容器对应的子 CGroup
+		cgroups.Cpu.DeleteSubCGroup(c.ID)
+		cgroups.Mem.DeleteSubCGroup(c.ID)
+		cgroups.Pid.DeleteSubCGroup(c.ID)
+	}
+
 	driver.D.UnMount(mntPath)
 
 	log.Printf("container %s stopped\n", c.Name)

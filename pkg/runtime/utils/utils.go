@@ -4,6 +4,9 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/wqvoon/cbox/pkg/cgroups"
+	"github.com/wqvoon/cbox/pkg/config"
+	"github.com/wqvoon/cbox/pkg/flags"
 	"github.com/wqvoon/cbox/pkg/log"
 )
 
@@ -35,4 +38,45 @@ func ExtractCmdFromOSArgs() (path string, args []string) {
 	}
 
 	return
+}
+
+// 按照 flags 来设置 containerID 对应的 CGroup
+func SetupCGroup(containerID string) {
+	if !config.GetCgroupConfig().Enable {
+		return
+	}
+
+	cpuCGroup := cgroups.Cpu.GetOrCreateSubCGroup(containerID)
+	cpuCGroup.SetCPULimit(flags.GetCPULimit())
+	cpuCGroup.SetNotifyOnRelease(true)
+
+	memCGroup := cgroups.Mem.GetOrCreateSubCGroup(containerID)
+	memCGroup.SetMemLimit(flags.GetMemLimit())
+	memCGroup.SetNotifyOnRelease(true)
+
+	taskLimit := flags.GetTaskLimit()
+	if taskLimit == -1 { // 如果等于 -1，说明用户没有做限制
+		return
+	}
+
+	pidCGroup := cgroups.Pid.GetOrCreateSubCGroup(containerID)
+	// 这里加 8 是因为要包括 runtime 进程与 exec 的宿主机进程各占 4 个线程
+	pidCGroup.SetTaskLimit(taskLimit + 8)
+	pidCGroup.SetNotifyOnRelease(true)
+}
+
+// 将 pid 对应的进程加入到 containerID 对应的 CGroup 中
+func JoinCurrentProcessToCGroup(pid int, containerID string) {
+	if !config.GetCgroupConfig().Enable {
+		return
+	}
+
+	cpuCGroup := cgroups.Cpu.GetOrCreateSubCGroup(containerID)
+	cpuCGroup.JoinProcessToSelf(pid)
+
+	memCGroup := cgroups.Mem.GetOrCreateSubCGroup(containerID)
+	memCGroup.JoinProcessToSelf(pid)
+
+	pidCGroup := cgroups.Pid.GetOrCreateSubCGroup(containerID)
+	pidCGroup.JoinProcessToSelf(pid)
 }

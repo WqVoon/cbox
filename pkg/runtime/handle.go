@@ -11,6 +11,7 @@ import (
 	"github.com/wqvoon/cbox/pkg/network/dns"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/runtime/info"
+	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
 	"github.com/wqvoon/cbox/pkg/utils"
 	"golang.org/x/sys/unix"
 )
@@ -18,6 +19,10 @@ import (
 // 这个函数只能在 RuntimeMode 下使用
 func Handle() {
 	c := container.GetContainerByID(flag.Arg(0))
+
+	// 创建容器对应的子 CGroup，并将当前pid加入
+	runtimeUtils.SetupCGroup(c.ID)
+	runtimeUtils.JoinCurrentProcessToCGroup(os.Getpid(), c.ID)
 
 	// 这里就不 Error 了，仅做个提醒，也不是啥大事
 	if err := unix.Sethostname([]byte(c.ID)); err != nil {
