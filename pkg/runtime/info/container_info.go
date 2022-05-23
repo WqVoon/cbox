@@ -21,7 +21,7 @@ func GetContainerInfo(containerID string) *ContainerInfo {
 
 	utils.GetObjFromJsonFile(infoPath, infoObj)
 	infoObj.filePath = infoPath
-	infoObj.containerID = containerID
+	infoObj.ContainerID = containerID
 
 	return infoObj
 }
@@ -31,7 +31,7 @@ type ContainerInfo struct {
 	// info 文件相对于 rootdir 的路径
 	filePath string
 	// 该 Info 对象对应的 containerID
-	containerID string
+	ContainerID string `json:"container_id"`
 
 	// runtime 进程的 pid，被 runtime.Run 写入
 	Pid int `json:"pid"`
@@ -47,7 +47,7 @@ type ContainerInfo struct {
 
 // 根据 health check 文件判断容器是否正常，由于里面记录的是实时错误原因，所以只需要检测文件长度即可
 func (ci *ContainerInfo) IsHealthy() bool {
-	filePath := rootdir.GetContainerHealthCheckInfoPath(ci.containerID, false)
+	filePath := rootdir.GetContainerHealthCheckInfoPath(ci.ContainerID, false)
 
 	info, err := os.Stat(filePath)
 	if err != nil {
@@ -112,7 +112,7 @@ func (ci *ContainerInfo) SaveDNSFilePath(filePath string) {
 }
 
 func (ci *ContainerInfo) SaveVolumes(vs []*volume.Volume) {
-	mntPath := rootdir.GetContainerMountPath(ci.containerID)
+	mntPath := rootdir.GetContainerMountPath(ci.ContainerID)
 
 	// 保证容器路径指向的是宿主机视角下的绝对路径
 	for _, v := range vs {

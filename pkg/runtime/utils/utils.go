@@ -3,6 +3,7 @@ package utils
 import (
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/wqvoon/cbox/pkg/cgroups"
 	"github.com/wqvoon/cbox/pkg/config"
@@ -79,4 +80,25 @@ func JoinCurrentProcessToCGroup(pid int, containerID string) {
 
 	pidCGroup := cgroups.Pid.GetOrCreateSubCGroup(containerID)
 	pidCGroup.JoinProcessToSelf(pid)
+}
+
+// 为 containerID 对应的容器删除 CGroups
+func DeleteCGroupForContainer(containerID string) {
+	if !config.GetCgroupConfig().Enable {
+		return
+	}
+
+	cgroups.Cpu.DeleteSubCGroup(containerID)
+	cgroups.Mem.DeleteSubCGroup(containerID)
+	cgroups.Pid.DeleteSubCGroup(containerID)
+}
+
+// 将当前进程的环境变量设置为 env 指定的内容，env 的格式如镜像的 config 文件中 ENV 字段的格式
+func UpdateEnv(env []string) {
+	os.Clearenv()
+	for _, oneEnv := range env {
+		envPair := strings.SplitN(oneEnv, "=", 2)
+		key, val := envPair[0], envPair[1]
+		os.Setenv(key, val)
+	}
 }

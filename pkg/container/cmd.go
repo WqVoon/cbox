@@ -3,13 +3,9 @@ package container
 import (
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strings"
-	"time"
 
-	"github.com/wqvoon/cbox/pkg/cgroups"
-	"github.com/wqvoon/cbox/pkg/config"
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	runtimeCmd "github.com/wqvoon/cbox/pkg/runtime/cmd"
@@ -65,17 +61,12 @@ func (c *Container) Exec(input ...string) {
 
 	utils.EnterNamespaceByPid(containerInfo.Pid)
 
-	// 需要保证在 ExtractCmdFromOSArgs 前进行 Env 的处理，这样得到的 cmd 才是正确的
-	os.Clearenv()
-	for _, oneEnv := range c.Env {
-		envPair := strings.SplitN(oneEnv, "=", 2)
-		key, val := envPair[0], envPair[1]
-		os.Setenv(key, val)
-	}
+	// 需要保证在 exec.Command 前进行 Env 的处理，这样得到的 cmd 才是正确的
+	runtimeUtils.UpdateEnv(c.Env)
 
 	runtimeUtils.JoinCurrentProcessToCGroup(os.Getpid(), c.ID)
 
-	// 这里需要保证在 ExtractCmdFromOSArgs 前进行 chroot，这样得到的 cmd 才是正确的
+	// 这里需要保证在 exec.Command 前进行 chroot，这样得到的 cmd 才是正确的
 	unix.Chroot(rootdir.GetContainerMountPath(c.ID))
 
 	cmd := exec.Command(name, args...)
@@ -105,32 +96,9 @@ func (c *Container) Stop() {
 		}
 	}
 
-	mntPath := rootdir.GetContainerMountPath(c.ID)
+	runtimeCmd.Stop(info)
 
-	procPath := path.Join(mntPath, "proc")
-	if err := unix.Unmount(procPath, 0); err != nil {
-		log.Errorln("faild to unmount proc, err:", err)
-	}
-
-	for _, v := range info.Volumes {
-		v.Unmount()
-	}
-
-	if err := info.GetProcess().Kill(); err != nil {
-		log.Errorln("failed to kill runtime process ,err:", err)
-	}
-	info.MarkStop()
-
-	// UnMount 必须在 Kill 之后，否则会报 device busy（至少对于 Overlay2 来说）
-	// TODO: 这里简单等待100ms，后面整个更稳妥的办法确保进程退出后再执行 UnMount
-	time.Sleep(100 * time.Millisecond)
-
-	if config.GetCgroupConfig().Enable { // 删除容器对应的子 CGroup
-		cgroups.Cpu.DeleteSubCGroup(c.ID)
-		cgroups.Mem.DeleteSubCGroup(c.ID)
-		cgroups.Pid.DeleteSubCGroup(c.ID)
-	}
-
+	mntPath := rootdir.GetContainerMountPath(info.ContainerID)
 	driver.D.UnMount(mntPath)
 
 	log.Printf("container %s stopped\n", c.Name)

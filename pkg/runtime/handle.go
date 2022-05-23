@@ -4,7 +4,6 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/wqvoon/cbox/pkg/container"
 	"github.com/wqvoon/cbox/pkg/log"
@@ -29,12 +28,7 @@ func Handle() {
 		log.Println("faild to set hostname, err:", err)
 	}
 
-	os.Clearenv()
-	for _, oneEnv := range c.Env {
-		envPair := strings.SplitN(oneEnv, "=", 2)
-		key, val := envPair[0], envPair[1]
-		os.Setenv(key, val)
-	}
+	runtimeUtils.UpdateEnv(c.Env)
 
 	containerInfo := info.GetContainerInfo(c.ID)
 
