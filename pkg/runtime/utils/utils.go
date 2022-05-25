@@ -61,25 +61,38 @@ func SetupCGroup(containerID string) {
 	}
 
 	pidCGroup := cgroups.Pid.GetOrCreateSubCGroup(containerID)
-	// 这里加 8 是因为要包括 runtime 进程与 exec 的宿主机进程各占 4 个线程
-	pidCGroup.SetTaskLimit(taskLimit + 8)
+	pidCGroup.SetTaskLimit(taskLimit)
 	pidCGroup.SetNotifyOnRelease(true)
 }
 
+// 是否可以加入一个 Task 到 name 对应的 CGroup 中，如果没有开启 cgroup feature，那么永远返回 true
+func CanJoinTaskToPidCGroup(name string) bool {
+	if !config.GetCgroupConfig().Enable {
+		return true
+	}
+
+	pidCGroup := cgroups.Pid.GetOrCreateSubCGroup(name)
+	return cgroups.Pid.CanJoinTask() && pidCGroup.CanJoinTask()
+}
+
 // 将 pid 对应的进程加入到 containerID 对应的 CGroup 中
-func JoinCurrentProcessToCGroup(pid int, containerID string) {
+func JoinProcessToCGroup(pid int, containerID string) {
 	if !config.GetCgroupConfig().Enable {
 		return
 	}
+
+	if !CanJoinTaskToPidCGroup(containerID) {
+		log.Errorln("can not join process", pid, "to pid cgroup")
+	}
+
+	pidCGroup := cgroups.Pid.GetOrCreateSubCGroup(containerID)
+	pidCGroup.JoinProcessToSelf(pid)
 
 	cpuCGroup := cgroups.Cpu.GetOrCreateSubCGroup(containerID)
 	cpuCGroup.JoinProcessToSelf(pid)
 
 	memCGroup := cgroups.Mem.GetOrCreateSubCGroup(containerID)
 	memCGroup.JoinProcessToSelf(pid)
-
-	pidCGroup := cgroups.Pid.GetOrCreateSubCGroup(containerID)
-	pidCGroup.JoinProcessToSelf(pid)
 }
 
 // 为 containerID 对应的容器删除 CGroups

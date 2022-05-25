@@ -3,9 +3,12 @@ package container
 import (
 	"crypto/rand"
 	"fmt"
+	"os"
+	"os/exec"
 
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/utils"
+	"golang.org/x/sys/unix"
 )
 
 func newContainerID() string {
@@ -39,5 +42,29 @@ func StopContainersByName(names ...string) {
 func DeleteContainersByName(names ...string) {
 	for _, name := range names {
 		GetContainerByName(name).Delete()
+	}
+}
+
+// 为 Container 创建一个 cmd 对象，优先使用 input 作为命令，否则使用容器的 entrypoint
+func getCmdForContainer(c *Container, input ...string) *exec.Cmd {
+	var name string
+	var args []string
+	if len(input) > 0 {
+		name, args = utils.ParseCmd(input...)
+	} else {
+		name, args = utils.ParseCmd(c.Entrypoint...)
+	}
+
+	return &exec.Cmd{
+		Path:   name,
+		Args:   append([]string{name}, args...),
+		Stdin:  os.Stdin,
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
+		Dir:    "/",
+		Env:    c.Env,
+		SysProcAttr: &unix.SysProcAttr{
+			Chroot: rootdir.GetContainerMountPath(c.ID),
+		},
 	}
 }

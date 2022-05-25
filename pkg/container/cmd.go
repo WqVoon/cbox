@@ -2,7 +2,6 @@ package container
 
 import (
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -13,7 +12,6 @@ import (
 	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
 	"github.com/wqvoon/cbox/pkg/storage/driver"
 	"github.com/wqvoon/cbox/pkg/utils"
-	"golang.org/x/sys/unix"
 )
 
 func (c *Container) Start() {
@@ -51,36 +49,26 @@ func (c *Container) Exec(input ...string) {
 		log.Errorln("only root user can exec a container")
 	}
 
-	var name string
-	var args []string
-	if len(input) > 0 {
-		name, args = utils.ParseCmd(input...)
-	} else {
-		name, args = utils.ParseCmd(c.Entrypoint...)
+	// 这里应该直接退出，因为如果开启了 cgroup feature 但不能加入 pid cgroup，那么后面的工作无意义
+	if !runtimeUtils.CanJoinTaskToPidCGroup(c.ID) {
+		log.Errorln("can not exec container, err: task limit")
 	}
 
 	utils.EnterNamespaceByPid(containerInfo.Pid)
 
-	// 需要保证在 exec.Command 前进行 Env 的处理，这样得到的 cmd 才是正确的
-	runtimeUtils.UpdateEnv(c.Env)
-
-	runtimeUtils.JoinCurrentProcessToCGroup(os.Getpid(), c.ID)
-
-	// 这里需要保证在 exec.Command 前进行 chroot，这样得到的 cmd 才是正确的
-	unix.Chroot(rootdir.GetContainerMountPath(c.ID))
-
-	cmd := exec.Command(name, args...)
+	cmd := getCmdForContainer(c, input...)
 	{
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Dir = "/"
-		cmd.Env = c.Env
-	}
+		if err := cmd.Start(); err != nil {
+			// 这里进行 Errorln，因为这里会触发 LookPathError 之类的错误，此时应该直接退出
+			log.Errorln("failed to exec container, err:", err)
+		}
 
-	if err := cmd.Run(); err != nil {
-		// 这里不进行 Errorln，用于避免 Ctrl+C 后 Ctrl+D 引起的常见错误
-		log.Println("an error may have occurred while running container:", err)
+		runtimeUtils.JoinProcessToCGroup(cmd.Process.Pid, c.ID)
+
+		if err := cmd.Wait(); err != nil {
+			// 这里不进行 Errorln，用于避免 Ctrl+C 后 Ctrl+D 引起的常见错误
+			log.Println("an error may have occurred while running container:", err)
+		}
 	}
 }
 

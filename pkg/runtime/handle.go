@@ -21,7 +21,6 @@ func Handle() {
 
 	// 创建容器对应的子 CGroup，并将当前pid加入
 	runtimeUtils.SetupCGroup(c.ID)
-	runtimeUtils.JoinCurrentProcessToCGroup(os.Getpid(), c.ID)
 
 	// 这里就不 Error 了，仅做个提醒，也不是啥大事
 	if err := unix.Sethostname([]byte(c.ID)); err != nil {
