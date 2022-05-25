@@ -56,7 +56,7 @@ func SetupCGroup(containerID string) {
 	memCGroup.SetNotifyOnRelease(true)
 
 	taskLimit := flags.GetTaskLimit()
-	if taskLimit == -1 { // 如果等于 -1，说明用户没有做限制
+	if taskLimit == cgroups.TaskNoLimit {
 		return
 	}
 

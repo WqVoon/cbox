@@ -10,6 +10,8 @@ import (
 	"github.com/wqvoon/cbox/pkg/utils"
 )
 
+const TaskNoLimit = -1
+
 func GetPIDCGroupByPath(pathname string) *PIDCGroup {
 	baseCGroup := BaseCGroup(pathname)
 
@@ -51,7 +53,7 @@ func (c *PIDCGroup) GetTaskLimit() int {
 
 	limitValStr := string(limitValBytes)
 	if limitValStr == "max" {
-		return -1
+		return TaskNoLimit
 	}
 
 	limitValNum, err := strconv.Atoi(limitValStr)
@@ -60,6 +62,28 @@ func (c *PIDCGroup) GetTaskLimit() int {
 	}
 
 	return limitValNum
+}
+
+// 获取当前 CGroups 与 another 对应的 CGroups 中更小的 TaskLimit 值
+func (c *PIDCGroup) GetLowerTaskLimit(another *PIDCGroup) int {
+	selfLimit := c.GetTaskLimit()
+	anotherLimit := another.GetTaskLimit()
+
+	if selfLimit == TaskNoLimit && anotherLimit != TaskNoLimit {
+		return anotherLimit
+	}
+
+	if selfLimit != TaskNoLimit && anotherLimit == TaskNoLimit {
+		return selfLimit
+	}
+
+	if selfLimit != TaskNoLimit && anotherLimit != TaskNoLimit {
+		if selfLimit < anotherLimit {
+			return selfLimit
+		}
+	}
+
+	return anotherLimit
 }
 
 // 获取当前 CGroups 中有多少个 Task
@@ -83,7 +107,7 @@ func (c *PIDCGroup) GetCurrentTaskNum() int {
 // 当前 CGroups 是否还可以新增 Task
 func (c *PIDCGroup) CanJoinTask() bool {
 	taskLimit := c.GetTaskLimit()
-	if taskLimit == -1 {
+	if taskLimit == TaskNoLimit {
 		return true
 	}
 

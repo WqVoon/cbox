@@ -1,6 +1,7 @@
 package cgroups
 
 import (
+	"bytes"
 	"io/ioutil"
 	"path"
 	"strconv"
@@ -34,6 +35,42 @@ func (c *MemCGroup) SetMemLimit(mem int) {
 	if err != nil {
 		log.Errorln("failed to set mem limit, err:", err)
 	}
+}
+
+// 获取当前 CGroup 对内存的限制，以 Byte 为单位
+func (c *MemCGroup) GetMemLimit() int {
+	limitFilePath := path.Join(c.GetDirPath(), "memory.limit_in_bytes")
+	limitValBytes, err := ioutil.ReadFile(limitFilePath)
+	if err != nil {
+		log.Errorln("failed to read memory.limit_in_bytes")
+	}
+
+	limitValBytes = bytes.TrimSpace(limitValBytes)
+
+	limitValNum, err := strconv.Atoi(string(limitValBytes))
+	if err != nil {
+		log.Errorln("failed to parse memory.limit_in_bytes")
+	}
+
+	return limitValNum
+}
+
+// 获取当前 CGroup 的内存用量，以 Byte 为单位
+func (c *MemCGroup) GetMemUsage() int {
+	usageFilePath := path.Join(c.GetDirPath(), "memory.usage_in_bytes")
+	usageValBytes, err := ioutil.ReadFile(usageFilePath)
+	if err != nil {
+		log.Errorln("failed to read memory.usage_in_bytes")
+	}
+
+	usageValBytes = bytes.TrimSpace(usageValBytes)
+
+	usageValNum, err := strconv.Atoi(string(usageValBytes))
+	if err != nil {
+		log.Errorln("failed to parse memory.usage_in_bytes")
+	}
+
+	return usageValNum
 }
 
 func (c *MemCGroup) IsValid() bool {

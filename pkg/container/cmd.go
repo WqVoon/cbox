@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/wqvoon/cbox/pkg/cgroups"
+	"github.com/wqvoon/cbox/pkg/config"
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	runtimeCmd "github.com/wqvoon/cbox/pkg/runtime/cmd"
@@ -156,6 +158,7 @@ func (c *Container) CopyToHost(from, to string) {
 // 展示容器相关的详细信息
 func (c *Container) Inspect() {
 	info := runtimeInfo.GetContainerInfo(c.ID)
+	isRunning := info.IsRunning()
 
 	log.Println("inspection of container", c.Name)
 	{
@@ -163,9 +166,9 @@ func (c *Container) Inspect() {
 		log.Println("- name:", c.Name)
 		log.Println("- image:", c.Image.NameTag)
 		log.Println("- is healthy:", info.IsHealthy())
-		log.Println("- is running:", info.IsRunning())
+		log.Println("- is running:", isRunning)
 
-		if info.IsRunning() {
+		if isRunning {
 			log.Println("- runtime pid:", info.Pid)
 		}
 
@@ -192,6 +195,29 @@ func (c *Container) Inspect() {
 				log.Printf("  - volume #%d:\n", idx)
 				log.Println("    - host path:", v.HostPath)
 				log.Println("    - container path:", v.ContainerPath[containerPathPrefix:])
+			}
+		}
+
+		if isRunning && config.GetCgroupConfig().Enable {
+			log.Println("- resources:")
+
+			memCGroup := cgroups.Mem.GetOrCreateSubCGroup(c.ID)
+			{
+				log.Printf("  - memory limit: %d byte\n", memCGroup.GetMemLimit())
+				log.Printf("  - memory usage: %d byte\n", memCGroup.GetMemUsage())
+			}
+
+			pidCGroup := cgroups.Pid.GetOrCreateSubCGroup(c.ID)
+			{
+				limitVal := pidCGroup.GetLowerTaskLimit(cgroups.Pid)
+
+				if limitVal == cgroups.TaskNoLimit {
+					log.Println("  - task limit: no limit")
+				} else {
+					log.Printf("  - task limit: %d\n", limitVal)
+				}
+
+				log.Printf("  - task count: %d\n", pidCGroup.GetCurrentTaskNum())
 			}
 		}
 	}
