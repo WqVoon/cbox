@@ -5,8 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/wqvoon/cbox/pkg/config"
 	"github.com/wqvoon/cbox/pkg/container"
 	"github.com/wqvoon/cbox/pkg/log"
+	"github.com/wqvoon/cbox/pkg/network"
 	"github.com/wqvoon/cbox/pkg/network/dns"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/runtime/info"
@@ -57,6 +59,16 @@ func Handle() {
 	utils.CreateDirIfNotExist("/proc")
 	if err := unix.Mount("cbox-proc", "/proc", "proc", 0, ""); err != nil {
 		log.Errorln("faild to mount /proc, err:", err)
+	}
+
+	if config.GetNetworkConfig().Enable {
+		ns := network.CreateNamespace()
+		network.CreateVethPairFor(c.ID)
+		network.SetVeth1NS(c.ID, ns)
+		network.EnterNamespaceByFd(ns)
+		network.ConfigAndUpVeth1(c.ID)
+		network.SetupLookback()
+		unix.Close(ns)
 	}
 
 	enterLoop(c)

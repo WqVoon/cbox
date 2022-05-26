@@ -6,9 +6,10 @@ import (
 )
 
 var defaultConfig = struct {
-	DriverName  string       `json:"storage_driver"`
-	DNSFilePath string       `json:"dns_file_path"`
-	CGroup      cgroupConfig `json:"cgroup"`
+	DriverName  string        `json:"storage_driver"`
+	DNSFilePath string        `json:"dns_file_path"`
+	CGroup      cgroupConfig  `json:"cgroup"`
+	Network     networkConfig `json:"network"`
 }{
 	DriverName:  "raw_copy",
 	DNSFilePath: "/etc/resolv.conf",
@@ -25,6 +26,11 @@ var defaultConfig = struct {
 		PIDCgroupPath: "/sys/fs/cgroup/pids",
 		TaskLimit:     -1, // 设置 -1 就是使用原本的值
 	},
+	Network: networkConfig{
+		Enable: true,
+		Name:   "cbox0",
+		Addr:   "172.29.0.1/16",
+	},
 }
 
 type cgroupConfig struct {
@@ -39,6 +45,12 @@ type cgroupConfig struct {
 
 	PIDCgroupPath string `json:"pid_cgroup_path"` // pid cgroup 的绝对路径
 	TaskLimit     int    `json:"task_limit"`      // 限制最多创建多少个 Task
+}
+
+type networkConfig struct {
+	Enable bool   `json:"enable"` // 是否启用网络隔离
+	Name   string `json:"name"`   // 网桥的名字
+	Addr   string `json:"addr"`   // 网桥的 CIDR
 }
 
 func Init() {
@@ -57,3 +69,5 @@ func GetDriverName() string { return defaultConfig.DriverName }
 func GetDNSFilePath() string { return defaultConfig.DNSFilePath }
 
 func GetCgroupConfig() cgroupConfig { return defaultConfig.CGroup }
+
+func GetNetworkConfig() networkConfig { return defaultConfig.Network }

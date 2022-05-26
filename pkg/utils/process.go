@@ -29,6 +29,7 @@ func EnterNamespaceByPid(pid int) {
 		"ipc": unix.CLONE_NEWIPC,
 		"pid": unix.CLONE_NEWPID,
 		"uts": unix.CLONE_NEWUTS,
+		"net": unix.CLONE_NEWNET,
 	}
 
 	for nsName, nsType := range targetNs {

@@ -5,7 +5,7 @@ import (
 	"github.com/wqvoon/cbox/pkg/config"
 	"github.com/wqvoon/cbox/pkg/flags"
 	"github.com/wqvoon/cbox/pkg/log"
-	"github.com/wqvoon/cbox/pkg/network/dns"
+	"github.com/wqvoon/cbox/pkg/network"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/storage/driver"
 	"github.com/wqvoon/cbox/pkg/storage/volume"
@@ -24,8 +24,8 @@ func Init() {
 	driver.Init()
 	// volume 通过 flags 参数决定使用哪些 volume
 	volume.Init()
-	// dns 使用了 log，所以需要放在 log.Init 后面
-	dns.Init()
+	// network 使用了 log 和 config，所以需要放在后面
+	network.Init()
 	// cgroups 使用了 config，所以需要放在 config.Init 后面
 	cgroups.Init()
 }

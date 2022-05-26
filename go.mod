@@ -7,4 +7,5 @@ replace github.com/wqvoon/cbox => ./
 require (
 	github.com/google/go-containerregistry v0.1.1
 	golang.org/x/sys v0.0.0-20220310020820-b874c991c1a5
+	github.com/vishvananda/netlink v1.1.0
 )
