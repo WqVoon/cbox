@@ -3,6 +3,8 @@ package utils
 import (
 	"os"
 	"os/exec"
+	"path"
+	"strconv"
 	"strings"
 
 	"github.com/wqvoon/cbox/pkg/cgroups"
@@ -75,24 +77,52 @@ func CanJoinTaskToPidCGroup(name string) bool {
 	return cgroups.Pid.CanJoinTask() && pidCGroup.CanJoinTask()
 }
 
-// 将 pid 对应的进程加入到 containerID 对应的 CGroup 中
-func JoinProcessToCGroup(pid int, containerID string) {
+// 获取 containerID 对应容器的几个 cgroup.procs 文件
+// 之所以要这样做，是因为若 `cbox exec` 想让容器的 PATH 环境变量生效就需要使用 chroot
+// 而一旦使用 chroot，那么就无法直接调用 JoinProcessToSelf 方法
+// 所以在 chroot 之前拿到几个 cgroup.procs 文件的句柄，然后后面直接写入进程 id 到句柄中
+func GetCGroupProcsFiles(containerID string) []*os.File {
+	if !config.GetCgroupConfig().Enable {
+		return nil
+	}
+
+	fileName := "cgroup.procs"
+
+	pidProcsFilePath := path.Join(cgroups.Pid.GetOrCreateSubCGroup(containerID).GetDirPath(), fileName)
+	pidFile, err := os.OpenFile(pidProcsFilePath, os.O_WRONLY, 0700)
+	if err != nil {
+		log.Errorln("failed to open pidProcsFile, err:", err)
+	}
+
+	cpuProcsFilePath := path.Join(cgroups.Cpu.GetOrCreateSubCGroup(containerID).GetDirPath(), fileName)
+	cpuFile, err := os.OpenFile(cpuProcsFilePath, os.O_WRONLY, 0700)
+	if err != nil {
+		log.Errorln("failed to open cpuProcsFile, err:", err)
+	}
+
+	memProcsFilePath := path.Join(cgroups.Mem.GetOrCreateSubCGroup(containerID).GetDirPath(), fileName)
+	memFile, err := os.OpenFile(memProcsFilePath, os.O_WRONLY, 0700)
+	if err != nil {
+		log.Errorln("failed to open memProcsFile, err:", err)
+	}
+
+	return []*os.File{pidFile, cpuFile, memFile}
+}
+
+// 将 pid 对应的进程写入到 files 中，这里的 files 实际是通过 GetCGroupProcsFiles 获得的
+func JoinProcessToCGroup(pidStr int, files []*os.File) {
 	if !config.GetCgroupConfig().Enable {
 		return
 	}
 
-	if !CanJoinTaskToPidCGroup(containerID) {
-		log.Errorln("can not join process", pid, "to pid cgroup")
+	pidNum := strconv.Itoa(pidStr)
+
+	for _, fd := range files {
+		if _, err := fd.WriteString(pidNum); err != nil {
+			log.Errorln("failed to write", pidStr, "to cgroups, err:", err)
+		}
+		fd.Close() // 写完后直接关闭即可
 	}
-
-	pidCGroup := cgroups.Pid.GetOrCreateSubCGroup(containerID)
-	pidCGroup.JoinProcessToSelf(pid)
-
-	cpuCGroup := cgroups.Cpu.GetOrCreateSubCGroup(containerID)
-	cpuCGroup.JoinProcessToSelf(pid)
-
-	memCGroup := cgroups.Mem.GetOrCreateSubCGroup(containerID)
-	memCGroup.JoinProcessToSelf(pid)
 }
 
 // 为 containerID 对应的容器删除 CGroups

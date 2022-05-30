@@ -58,6 +58,7 @@ func (c *Container) Exec(input ...string) {
 	}
 
 	utils.EnterNamespaceByPid(containerInfo.Pid)
+	cgroupFiles := runtimeUtils.GetCGroupProcsFiles(c.ID)
 
 	cmd := getCmdForContainer(c, input...)
 	{
@@ -66,7 +67,8 @@ func (c *Container) Exec(input ...string) {
 			log.Errorln("failed to exec container, err:", err)
 		}
 
-		runtimeUtils.JoinProcessToCGroup(cmd.Process.Pid, c.ID)
+		// 这个函数会负责关闭 cgroupFiles 中的句柄
+		runtimeUtils.JoinProcessToCGroup(cmd.Process.Pid, cgroupFiles)
 
 		if err := cmd.Wait(); err != nil {
 			// 这里不进行 Errorln，用于避免 Ctrl+C 后 Ctrl+D 引起的常见错误

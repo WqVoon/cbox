@@ -7,6 +7,7 @@ import (
 	"os/exec"
 
 	"github.com/wqvoon/cbox/pkg/rootdir"
+	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
 	"github.com/wqvoon/cbox/pkg/utils"
 	"golang.org/x/sys/unix"
 )
@@ -55,16 +56,15 @@ func getCmdForContainer(c *Container, input ...string) *exec.Cmd {
 		name, args = utils.ParseCmd(c.Entrypoint...)
 	}
 
-	return &exec.Cmd{
-		Path:   name,
-		Args:   append([]string{name}, args...),
-		Stdin:  os.Stdin,
-		Stdout: os.Stdout,
-		Stderr: os.Stderr,
-		Dir:    "/",
-		Env:    c.Env,
-		SysProcAttr: &unix.SysProcAttr{
-			Chroot: rootdir.GetContainerMountPath(c.ID),
-		},
+	runtimeUtils.UpdateEnv(c.Env)
+	unix.Chroot(rootdir.GetContainerMountPath(c.ID))
+
+	cmd := exec.Command(name, args...)
+	{
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Dir = "/"
 	}
+	return cmd
 }
