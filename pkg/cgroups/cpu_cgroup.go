@@ -10,6 +10,11 @@ import (
 	"github.com/wqvoon/cbox/pkg/utils"
 )
 
+const (
+	CpuCFSPeriodUS = "cpu.cfs_period_us"
+	CpuCFSQuotaUS  = "cpu.cfs_quota_us"
+)
+
 func GetCPUCGroupByPath(pathname string) *CPUCGroup {
 	baseCGroup := BaseCGroup(pathname)
 
@@ -32,8 +37,8 @@ func (c *CPUCGroup) SetCPULimit(cpuNum int) {
 	}
 
 	dirPath := c.GetDirPath()
-	cfsPeriodPath := path.Join(dirPath, "cpu.cfs_period_us")
-	cfsQuotaPath := path.Join(dirPath, "cpu.cfs_quota_us")
+	cfsPeriodPath := path.Join(dirPath, CpuCFSPeriodUS)
+	cfsQuotaPath := path.Join(dirPath, CpuCFSQuotaUS)
 
 	// 基数单位，由于 cpu cgroup 的单位是微妙，所以这个值表示 1 秒
 	baseNum := 1000000
@@ -50,8 +55,8 @@ func (c *CPUCGroup) SetCPULimit(cpuNum int) {
 func (c *CPUCGroup) IsValid() bool {
 	dirPath := c.GetDirPath()
 	checkedFiles := []string{
-		"cpu.cfs_period_us",
-		"cpu.cfs_quota_us",
+		CpuCFSPeriodUS,
+		CpuCFSQuotaUS,
 	}
 
 	for _, filename := range checkedFiles {

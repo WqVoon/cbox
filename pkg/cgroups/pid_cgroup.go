@@ -10,7 +10,11 @@ import (
 	"github.com/wqvoon/cbox/pkg/utils"
 )
 
-const TaskNoLimit = -1
+const (
+	TaskNoLimit = -1
+	PidsMax     = "pids.max"
+	PidsCurrent = "pids.current"
+)
 
 func GetPIDCGroupByPath(pathname string) *PIDCGroup {
 	baseCGroup := BaseCGroup(pathname)
@@ -28,7 +32,7 @@ type PIDCGroup struct {
 
 // 限制当前 CGroup 中最多能够创建多少个 Task
 func (c *PIDCGroup) SetTaskLimit(num int) {
-	limitFilePath := path.Join(c.GetDirPath(), "pids.max")
+	limitFilePath := path.Join(c.GetDirPath(), PidsMax)
 
 	limitVal := "max"
 	if num >= 0 {
@@ -43,10 +47,10 @@ func (c *PIDCGroup) SetTaskLimit(num int) {
 
 // 获取当前 CGroups 最大允许创建多少个 Task，如果为 max 那么返回 -1
 func (c *PIDCGroup) GetTaskLimit() int {
-	limitFilePath := path.Join(c.GetDirPath(), "pids.max")
+	limitFilePath := path.Join(c.GetDirPath(), PidsMax)
 	limitValBytes, err := ioutil.ReadFile(limitFilePath)
 	if err != nil {
-		log.Errorln("failed to read pids.max, err:", err)
+		log.Errorln("failed to read", PidsMax, ", err:", err)
 	}
 
 	limitValBytes = bytes.TrimSpace(limitValBytes)
@@ -58,7 +62,7 @@ func (c *PIDCGroup) GetTaskLimit() int {
 
 	limitValNum, err := strconv.Atoi(limitValStr)
 	if err != nil {
-		log.Errorln("failed to parse pids.max, err:", err)
+		log.Errorln("failed to parse", PidsMax, ", err:", err)
 	}
 
 	return limitValNum
@@ -88,17 +92,17 @@ func (c *PIDCGroup) GetLowerTaskLimit(another *PIDCGroup) int {
 
 // 获取当前 CGroups 中有多少个 Task
 func (c *PIDCGroup) GetCurrentTaskNum() int {
-	currentFilePath := path.Join(c.GetDirPath(), "pids.current")
+	currentFilePath := path.Join(c.GetDirPath(), PidsCurrent)
 	currentValBytes, err := ioutil.ReadFile(currentFilePath)
 	if err != nil {
-		log.Errorln("failed to read pids.current, err:", err)
+		log.Errorln("failed to read", PidsCurrent, ", err:", err)
 	}
 
 	currentValBytes = bytes.TrimSpace(currentValBytes)
 
 	currentValNum, err := strconv.Atoi(string(currentValBytes))
 	if err != nil {
-		log.Errorln("failed to parse pids.max, err:", err)
+		log.Errorln("failed to parse", PidsMax, ", err:", err)
 	}
 
 	return currentValNum
@@ -117,7 +121,7 @@ func (c *PIDCGroup) CanJoinTask() bool {
 func (c *PIDCGroup) IsValid() bool {
 	// 只检查 pids.current 而不检查 pids.max
 	// 因为 pids 的 root cgroup 中没有这个文件
-	checkedFile := path.Join(c.GetDirPath(), "pids.current")
+	checkedFile := path.Join(c.GetDirPath(), PidsCurrent)
 
 	if !utils.PathIsExist(checkedFile) {
 		return false

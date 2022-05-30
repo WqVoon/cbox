@@ -10,6 +10,11 @@ import (
 	"github.com/wqvoon/cbox/pkg/utils"
 )
 
+const (
+	MemLimitInBytes = "memory.limit_in_bytes"
+	MemUsageInBytes = "memory.usage_in_bytes"
+)
+
 func GetMemCGroupByPath(pathname string) *MemCGroup {
 	baseCGroup := BaseCGroup(pathname)
 
@@ -28,7 +33,7 @@ type MemCGroup struct {
 func (c *MemCGroup) SetMemLimit(mem int) {
 	const MiB = 1024 * 1024
 
-	limitFilePath := path.Join(c.GetDirPath(), "memory.limit_in_bytes")
+	limitFilePath := path.Join(c.GetDirPath(), MemLimitInBytes)
 	memSize := mem * MiB
 
 	err := ioutil.WriteFile(limitFilePath, []byte(strconv.Itoa(memSize)), 0644)
@@ -39,17 +44,17 @@ func (c *MemCGroup) SetMemLimit(mem int) {
 
 // 获取当前 CGroup 对内存的限制，以 Byte 为单位
 func (c *MemCGroup) GetMemLimit() int {
-	limitFilePath := path.Join(c.GetDirPath(), "memory.limit_in_bytes")
+	limitFilePath := path.Join(c.GetDirPath(), MemLimitInBytes)
 	limitValBytes, err := ioutil.ReadFile(limitFilePath)
 	if err != nil {
-		log.Errorln("failed to read memory.limit_in_bytes")
+		log.Errorln("failed to read", MemLimitInBytes)
 	}
 
 	limitValBytes = bytes.TrimSpace(limitValBytes)
 
 	limitValNum, err := strconv.Atoi(string(limitValBytes))
 	if err != nil {
-		log.Errorln("failed to parse memory.limit_in_bytes")
+		log.Errorln("failed to parse", MemLimitInBytes)
 	}
 
 	return limitValNum
@@ -57,24 +62,24 @@ func (c *MemCGroup) GetMemLimit() int {
 
 // 获取当前 CGroup 的内存用量，以 Byte 为单位
 func (c *MemCGroup) GetMemUsage() int {
-	usageFilePath := path.Join(c.GetDirPath(), "memory.usage_in_bytes")
+	usageFilePath := path.Join(c.GetDirPath(), MemUsageInBytes)
 	usageValBytes, err := ioutil.ReadFile(usageFilePath)
 	if err != nil {
-		log.Errorln("failed to read memory.usage_in_bytes")
+		log.Errorln("failed to read", MemUsageInBytes)
 	}
 
 	usageValBytes = bytes.TrimSpace(usageValBytes)
 
 	usageValNum, err := strconv.Atoi(string(usageValBytes))
 	if err != nil {
-		log.Errorln("failed to parse memory.usage_in_bytes")
+		log.Errorln("failed to parse", MemUsageInBytes)
 	}
 
 	return usageValNum
 }
 
 func (c *MemCGroup) IsValid() bool {
-	checkedFile := path.Join(c.GetDirPath(), "memory.limit_in_bytes")
+	checkedFile := path.Join(c.GetDirPath(), MemLimitInBytes)
 
 	if !utils.PathIsExist(checkedFile) {
 		return false

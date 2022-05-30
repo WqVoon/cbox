@@ -12,13 +12,19 @@ import (
 
 type BaseCGroup string
 
+const (
+	CgroupProcs     = "cgroup.procs"
+	NotifyOnRelease = "notify_on_release"
+	Tasks           = "tasks"
+)
+
 // 判断是否是一个有效的 cgroup 目录，判断依据为特征文件是否存在
 func (c *BaseCGroup) IsValid() bool {
 	dirPath := c.GetDirPath()
 	checkedFiles := []string{
-		"cgroup.procs",      // 属于这一 cgroups 的进程
-		"notify_on_release", // 该 cgroups 退出时是否执行 release_agent
-		"tasks",             // 属于这一 cgroups 的线程
+		CgroupProcs,     // 属于这一 cgroups 的进程
+		NotifyOnRelease, // 该 cgroups 退出时是否执行 release_agent
+		Tasks,           // 属于这一 cgroups 的线程
 		// 不检查 release_agent，因为只有 root cgroup 中才存在这一文件
 	}
 
@@ -63,7 +69,7 @@ func (c *BaseCGroup) JoinProcessToSelf(pid int) {
 
 	c.ValidOrDie()
 
-	cProcsPath := path.Join(dirPath, "cgroup.procs")
+	cProcsPath := path.Join(dirPath, CgroupProcs)
 
 	if err := ioutil.WriteFile(cProcsPath, []byte(strconv.Itoa(pid)), 0644); err != nil {
 		log.Errorf("failed to join process %d to cgroup %q, err: %v\n", pid, dirPath, err)
@@ -77,7 +83,7 @@ func (c *BaseCGroup) SetNotifyOnRelease(setToTrue bool) {
 	}
 
 	dirPath := c.GetDirPath()
-	notifyConfigPath := path.Join(dirPath, "notify_on_release")
+	notifyConfigPath := path.Join(dirPath, NotifyOnRelease)
 
 	if err := ioutil.WriteFile(notifyConfigPath, []byte(val), 0644); err != nil {
 		log.Errorf("failed to set notify_no_release for cgroup %q, err: %v\n", dirPath, err)

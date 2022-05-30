@@ -86,7 +86,7 @@ func GetCGroupProcsFiles(containerID string) []*os.File {
 		return nil
 	}
 
-	fileName := "cgroup.procs"
+	fileName := cgroups.CgroupProcs
 
 	pidProcsFilePath := path.Join(cgroups.Pid.GetOrCreateSubCGroup(containerID).GetDirPath(), fileName)
 	pidFile, err := os.OpenFile(pidProcsFilePath, os.O_WRONLY, 0700)
