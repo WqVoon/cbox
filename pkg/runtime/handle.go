@@ -37,8 +37,8 @@ func Handle() {
 	{ // 配置容器 dns，如果 /etc 目录存在但 /etc/resolv.conf 文件不存在，那么创建该文件
 		hostDnsFilePath := dns.GetDNSFilePath()
 		containerDnsFilePath := rootdir.GetContainerDNSConfigPath(c.ID)
-		containerEtcPath := filepath.Dir(containerDnsFilePath)
-		if !utils.PathIsExist(containerDnsFilePath) && utils.PathIsExist(containerEtcPath) {
+		containerEtcPath := filepath.Dir(containerDnsFilePath) // `/etc` 文件夹
+		if utils.PathIsExist(containerEtcPath) {
 			utils.CopyFile(hostDnsFilePath, containerDnsFilePath)
 			containerInfo.SaveDNSFilePath(hostDnsFilePath)
 		}
