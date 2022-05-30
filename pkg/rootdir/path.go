@@ -123,4 +123,7 @@ func GetImageTarballPath(imgHash string) string {
 	return path.Join(GetTarballRootPath(), imgHash, "image.tar")
 }
 
+// 当前使用中的 ip
+func GetUsedIPPath() string { return path.Join(GetRootDirPath(), "used_ip") }
+
 func GetConfigPath() string { return path.Join(GetRootDirPath(), "config.json") }

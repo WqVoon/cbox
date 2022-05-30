@@ -27,9 +27,13 @@ var defaultConfig = struct {
 		TaskLimit:     -1, // 设置 -1 就是使用原本的值
 	},
 	Network: networkConfig{
-		Enable: true,
-		Name:   "cbox0",
-		Addr:   "172.29.0.1/16",
+		Enable:     true,
+		Name:       "cbox0",
+		BridgeCIDR: "172.29.0.1/16",
+		IPRange: ipRange{
+			Start: "172.29.0.150/16",
+			End:   "172.29.0.200/16",
+		},
 	},
 }
 
@@ -48,9 +52,15 @@ type cgroupConfig struct {
 }
 
 type networkConfig struct {
-	Enable bool   `json:"enable"` // 是否启用网络隔离
-	Name   string `json:"name"`   // 网桥的名字
-	Addr   string `json:"addr"`   // 网桥的 CIDR
+	Enable     bool    `json:"enable"`      // 是否启用网络隔离
+	Name       string  `json:"name"`        // 网桥的名字
+	BridgeCIDR string  `json:"bridge_cidr"` // 网桥的 CIDR
+	IPRange    ipRange `json:"ip_range"`
+}
+
+type ipRange struct {
+	Start string `json:"start"`
+	End   string `json:"end"`
 }
 
 func Init() {

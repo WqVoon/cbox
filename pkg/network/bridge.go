@@ -24,7 +24,7 @@ func InitBridge() {
 		}
 	}
 
-	bridgeAddr, err := netlink.ParseAddr(bridgeConfig.Addr)
+	bridgeAddr, err := netlink.ParseAddr(bridgeConfig.BridgeCIDR)
 	if err != nil {
 		log.Errorln("failed to parse bridge addr, err:", err)
 	}

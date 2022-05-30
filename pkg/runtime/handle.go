@@ -9,6 +9,7 @@ import (
 	"github.com/wqvoon/cbox/pkg/container"
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/network"
+	"github.com/wqvoon/cbox/pkg/network/address"
 	"github.com/wqvoon/cbox/pkg/network/dns"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	"github.com/wqvoon/cbox/pkg/runtime/info"
@@ -47,6 +48,16 @@ func Handle() {
 		v.Mount()
 	}
 
+	networkCfg := config.GetNetworkConfig()
+	ip := containerInfo.IP
+	if networkCfg.Enable {
+		if !address.IsValidIPv4(ip) {
+			ip = address.GetIPAddress(networkCfg.IPRange.Start, networkCfg.IPRange.End)
+			containerInfo.SaveIP(ip)
+		}
+		log.Println("container ip:", ip)
+	}
+
 	if err := unix.Chroot(rootdir.GetContainerMountPath(c.ID)); err != nil {
 		log.Errorln("failed to chroot, err:", err)
 	}
@@ -66,7 +77,7 @@ func Handle() {
 		network.CreateVethPairFor(c.ID)
 		network.SetVeth1NS(c.ID, ns)
 		network.EnterNamespaceByFd(ns)
-		network.ConfigAndUpVeth1(c.ID)
+		network.ConfigAndUpVeth1(c.ID, ip)
 		network.SetupLookback()
 		unix.Close(ns)
 	}

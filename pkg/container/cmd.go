@@ -8,6 +8,7 @@ import (
 	"github.com/wqvoon/cbox/pkg/cgroups"
 	"github.com/wqvoon/cbox/pkg/config"
 	"github.com/wqvoon/cbox/pkg/log"
+	"github.com/wqvoon/cbox/pkg/network/address"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	runtimeCmd "github.com/wqvoon/cbox/pkg/runtime/cmd"
 	runtimeInfo "github.com/wqvoon/cbox/pkg/runtime/info"
@@ -95,7 +96,8 @@ func (c *Container) Stop() {
 }
 
 func (c *Container) Delete() {
-	if runtimeInfo.GetContainerInfo(c.ID).IsRunning() {
+	info := runtimeInfo.GetContainerInfo(c.ID)
+	if info.IsRunning() {
 		log.Errorln("can not delete a running container")
 		return
 	}
@@ -106,6 +108,8 @@ func (c *Container) Delete() {
 	if err := os.RemoveAll(c.rootPath); err != nil {
 		log.Errorf("faild to remove container %q, err: %v\n", c.Name, err)
 	}
+
+	address.ReleaseIPByString(info.IP)
 	// TODO: 后面要处理更多的运行时副作用
 
 	log.Printf("container %s deleted\n", c.Name)
@@ -170,6 +174,10 @@ func (c *Container) Inspect() {
 
 		if isRunning {
 			log.Println("- runtime pid:", info.Pid)
+		}
+
+		if address.IsValidIPv4(info.IP) {
+			log.Println("- ip:", info.IP)
 		}
 
 		log.Println("- storage driver:", info.StorageDriver)

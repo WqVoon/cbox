@@ -33,6 +33,9 @@ type ContainerInfo struct {
 	// 该 Info 对象对应的 containerID
 	ContainerID string `json:"container_id"`
 
+	// 该容器的 ip 地址，仅在开启网络隔离时有效，否则为 none
+	IP string `json:"ip"`
+
 	// runtime 进程的 pid，被 runtime.Run 写入
 	Pid int `json:"pid"`
 
@@ -88,6 +91,11 @@ func (ci *ContainerInfo) GetStorageDriver() driver.Interface {
 	}
 
 	return driver.GetDriverByName(ci.StorageDriver)
+}
+
+func (ci *ContainerInfo) SaveIP(ip string) {
+	ci.IP = ip
+	ci.save()
 }
 
 func (ci *ContainerInfo) SavePid(pid int) {

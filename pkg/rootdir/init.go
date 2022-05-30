@@ -54,6 +54,7 @@ func initRootDirLayout() {
 	subPaths := []string{
 		path.Join("containers", "idx.json"),
 		path.Join("images", "idx.json"),
+		"used_ip",
 		// "config.json", 这个文件由 config 模块写入内容
 	}
 

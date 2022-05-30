@@ -4,6 +4,7 @@ import (
 	"net"
 
 	"github.com/vishvananda/netlink"
+	"github.com/wqvoon/cbox/pkg/config"
 	"github.com/wqvoon/cbox/pkg/log"
 )
 
@@ -43,14 +44,14 @@ func SetVeth1NS(containerID string, nsFd int) {
 	}
 }
 
-func ConfigAndUpVeth1(containerID string) {
+func ConfigAndUpVeth1(containerID string, ip string) {
 	vethName := "veth1_" + containerID[:6]
 	vethDev, err := netlink.LinkByName(vethName)
 	if err != nil {
 		log.Errorln("failed to get veth1, err:", err)
 	}
 
-	addr, err := netlink.ParseAddr(CreateIPAddress() + "/16")
+	addr, err := netlink.ParseAddr(ip)
 	if err != nil {
 		log.Errorln("failed to parse ip address, err:", err)
 	}
@@ -63,10 +64,16 @@ func ConfigAndUpVeth1(containerID string) {
 		log.Errorln("failed to setup veth, err:", err)
 	}
 
+	// TODO: 这部分逻辑应该集成到 Bridge 中
+	bridgeIp, _, err := net.ParseCIDR(config.GetNetworkConfig().BridgeCIDR)
+	if err != nil {
+		log.Errorln("failed to parse bridge cidr, err:", err)
+	}
+
 	route := netlink.Route{
 		Scope:     netlink.SCOPE_UNIVERSE,
 		LinkIndex: vethDev.Attrs().Index,
-		Gw:        net.ParseIP("172.29.0.1"), // TODO: 拒绝硬编码
+		Gw:        bridgeIp,
 		Dst:       nil,
 	}
 	if err := netlink.RouteAdd(&route); err != nil {
