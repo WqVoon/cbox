@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"os"
 	"syscall"
+	"time"
 
 	"github.com/wqvoon/cbox/pkg/log"
 	"golang.org/x/sys/unix"
 )
+
+const waitInterval = 100 * time.Millisecond
 
 // 检查进程是否存在
 func ProcessIsRunning(pid int) bool {
@@ -16,6 +19,26 @@ func ProcessIsRunning(pid int) bool {
 
 	err := p.Signal(syscall.Signal(0))
 	return err != os.ErrProcessDone
+}
+
+// 等待进程启动
+func WaitForStart(pid int) {
+	for {
+		if ProcessIsRunning(pid) {
+			return
+		}
+		time.Sleep(waitInterval)
+	}
+}
+
+// 等待进程退出
+func WaitForStop(pid int) {
+	for {
+		if !ProcessIsRunning(pid) {
+			return
+		}
+		time.Sleep(waitInterval)
+	}
 }
 
 // 进入 pid 对应的进程的命名空间中

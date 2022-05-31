@@ -2,12 +2,12 @@ package cmd
 
 import (
 	"path"
-	"time"
 
 	"github.com/wqvoon/cbox/pkg/log"
 	"github.com/wqvoon/cbox/pkg/rootdir"
 	runtimeInfo "github.com/wqvoon/cbox/pkg/runtime/info"
 	runtimeUtils "github.com/wqvoon/cbox/pkg/runtime/utils"
+	"github.com/wqvoon/cbox/pkg/utils"
 	"golang.org/x/sys/unix"
 )
 
@@ -15,11 +15,10 @@ func Stop(info *runtimeInfo.ContainerInfo) {
 	if err := info.GetProcess().Kill(); err != nil {
 		log.Errorln("failed to kill runtime process ,err:", err)
 	}
-	info.MarkStop()
 
 	// UnMount 必须在 Kill 之后，否则会报 device busy（至少对于 Overlay2 来说）
-	// TODO: 这里简单等待100ms，后面整个更稳妥的办法确保进程退出后再执行 UnMount
-	time.Sleep(100 * time.Millisecond)
+	utils.WaitForStop(info.Pid)
+	info.MarkStop()
 
 	mntPath := rootdir.GetContainerMountPath(info.ContainerID)
 
