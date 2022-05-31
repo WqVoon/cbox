@@ -6,35 +6,32 @@ import (
 	"github.com/wqvoon/cbox/pkg/log"
 )
 
-var bridge netlink.Link
+var Bridge *Device
+
+// 获取或创建一个网桥
+func GetOrCreateBridge(name string) *Device {
+	rawBridge, err := netlink.LinkByName(name)
+	if err != nil { // 这里假定出错一定是因为不存在对应的设备
+		linkAttrs := netlink.NewLinkAttrs()
+		linkAttrs.Name = name
+		rawBridge = &netlink.Bridge{LinkAttrs: linkAttrs}
+
+		if err := netlink.LinkAdd(rawBridge); err != nil {
+			log.Errorln("failed to create bridge, err:", err)
+		}
+	}
+	return &Device{rawDevice: rawBridge}
+}
 
 // 初始化网桥设备，如果不存在则创建，否则更新其地址并将其启动
 func InitBridge() {
-	bridgeConfig := config.GetNetworkConfig()
+	cfg := config.GetNetworkConfig()
 
-	var err error
-	bridge, err = netlink.LinkByName(bridgeConfig.Name)
-	if err != nil { // 这里假定出错一定是因为不存在对应的设备
-		linkAttrs := netlink.NewLinkAttrs()
-		linkAttrs.Name = bridgeConfig.Name
-		bridge = &netlink.Bridge{LinkAttrs: linkAttrs}
-
-		if err := netlink.LinkAdd(bridge); err != nil {
-			log.Errorln("failed to add bridge, err:", err)
-		}
+	tmpBridge := GetOrCreateBridge(cfg.Name)
+	{
+		tmpBridge.SetAddress(cfg.BridgeCIDR)
+		tmpBridge.SetUp()
 	}
 
-	bridgeAddr, err := netlink.ParseAddr(bridgeConfig.BridgeCIDR)
-	if err != nil {
-		log.Errorln("failed to parse bridge addr, err:", err)
-	}
-
-	CleanAddr(bridge)
-	if err := netlink.AddrAdd(bridge, bridgeAddr); err != nil {
-		log.Errorln("failed to set addr for bridge, err:", err)
-	}
-
-	if err := netlink.LinkSetUp(bridge); err != nil {
-		log.Errorln("failed to set up bridge, err:", err)
-	}
+	Bridge = tmpBridge
 }

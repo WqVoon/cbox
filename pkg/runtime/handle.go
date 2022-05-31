@@ -48,15 +48,7 @@ func Handle() {
 		v.Mount()
 	}
 
-	networkCfg := config.GetNetworkConfig()
-	ip := containerInfo.IP
-	if networkCfg.Enable {
-		if !address.IsValidIPv4(ip) {
-			ip = address.GetIPAddress(networkCfg.IPRange.Start, networkCfg.IPRange.End)
-			containerInfo.SaveIP(ip)
-		}
-		log.Println("container ip:", ip)
-	}
+	setupNetworkNamespace(containerInfo)
 
 	if err := unix.Chroot(rootdir.GetContainerMountPath(c.ID)); err != nil {
 		log.Errorln("failed to chroot, err:", err)
@@ -70,16 +62,6 @@ func Handle() {
 	utils.CreateDirIfNotExist("/proc")
 	if err := unix.Mount("cbox-proc", "/proc", "proc", 0, ""); err != nil {
 		log.Errorln("faild to mount /proc, err:", err)
-	}
-
-	if config.GetNetworkConfig().Enable {
-		ns := network.CreateNamespace()
-		network.CreateVethPairFor(c.ID)
-		network.SetVeth1NS(c.ID, ns)
-		network.EnterNamespaceByFd(ns)
-		network.ConfigAndUpVeth1(c.ID, ip)
-		network.SetupLookback()
-		unix.Close(ns)
 	}
 
 	enterLoop(c)
@@ -124,4 +106,34 @@ func enterLoop(c *container.Container) {
 			unix.Pause()
 		}
 	}
+}
+
+// 新建、进入并设置网络命名空间，此步骤要在 chroot 之前
+func setupNetworkNamespace(containerInfo *info.ContainerInfo) {
+	networkCfg := config.GetNetworkConfig()
+	if !networkCfg.Enable {
+		return
+	}
+
+	if !address.IsValidIPv4(containerInfo.IP) {
+		ip := address.GetIPAddress(networkCfg.IPRange.Start, networkCfg.IPRange.End)
+		containerInfo.SaveIP(ip)
+	}
+	log.Println("container ip:", containerInfo.IP)
+
+	ns := network.CreateNamespace()
+	vp := network.CreateVethPairFor(containerInfo.ContainerID)
+	{
+		vp.HostPeer.SetUp()
+		vp.HostPeer.SetMaster(network.Bridge)
+
+		vp.CntrPeer.SetNamespace(ns)
+		network.EnterNamespaceByFd(ns)
+		vp.CntrPeer.SetAddress(containerInfo.IP)
+		vp.CntrPeer.SetUp()
+	}
+
+	network.SetDefaultRoute(network.Bridge.GetIP(), vp.CntrPeer)
+	network.SetupLookback()
+	unix.Close(ns)
 }
