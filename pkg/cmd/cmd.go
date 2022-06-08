@@ -208,7 +208,7 @@ func init() {
 
 	RegisterCmd(
 		"pull",
-		"拉取镜像到本地，命令格式 `cbox pull <CONTAINER>`",
+		"拉取镜像到本地，命令格式 `cbox pull <IMAGE>`",
 		func(args []string) {
 			if len(args) != 1 {
 				log.Errorln("malformed command, run `cbox help` for more info")
