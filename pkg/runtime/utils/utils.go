@@ -58,10 +58,6 @@ func SetupCGroup(containerID string) {
 	memCGroup.SetNotifyOnRelease(true)
 
 	taskLimit := flags.GetTaskLimit()
-	if taskLimit == cgroups.TaskNoLimit {
-		return
-	}
-
 	pidCGroup := cgroups.Pid.GetOrCreateSubCGroup(containerID)
 	pidCGroup.SetTaskLimit(taskLimit)
 	pidCGroup.SetNotifyOnRelease(true)
