@@ -94,7 +94,7 @@ func init() {
 
 	RegisterCmd(
 		"run",
-		"create + start，默认运行 entrypoint，命令格式 `cbox run <IMAGE> <CONTAINER> [...args]`",
+		"create + start + exec，默认运行 entrypoint，命令格式 `cbox run <IMAGE> <CONTAINER> [...args]`",
 		func(args []string) {
 			if len(args) < 2 {
 				log.Errorln("malformed command, run `cbox help` for more info")
