@@ -1,7 +1,7 @@
 # 开启本机的转发功能
 sysctl net.ipv4.conf.all.forwarding=1
 
-# 配置 iptables 规则，让属于网桥网络的数据包在发往外网时经过 DNAT
+# 配置 iptables 规则，让属于网桥网络的数据包在发往外网时经过 SNAT
 # 网桥名与网络号由 rootdir 中 config.json 进行配置
 iptables -t nat -I POSTROUTING 1 -s 172.29.0.0/16 ! -o cbox0 -j MASQUERADE
 
